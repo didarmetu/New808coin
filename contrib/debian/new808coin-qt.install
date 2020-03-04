@@ -1,0 +1,6 @@
+usr/local/bin/new808coin-qt usr/bin
+share/pixmaps/bitcoin32.xpm usr/share/pixmaps
+share/pixmaps/bitcoin16.xpm usr/share/pixmaps
+share/pixmaps/bitcoin128.png usr/share/pixmaps
+debian/new808coin-qt.desktop usr/share/applications
+debian/new808coin-qt.protocol usr/share/kde4/services/

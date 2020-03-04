@@ -1,0 +1,11 @@
+[Protocol]
+exec=new808coin-qt '%u'
+protocol=new808coin
+input=none
+output=none
+helper=true
+listing=
+reading=false
+writing=false
+makedir=false
+deleting=false

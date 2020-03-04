@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+#  new808coind The New808coin core server.
+#
+#
+# chkconfig: 345 80 20
+# description: new808coind
+# processname: new808coind
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/new808coind, see below
+if [ -f /etc/sysconfig/new808coind ]; then
+        . /etc/sysconfig/new808coind
+fi
+
+RETVAL=0
+
+prog=new808coind
+# you can override the lockfile via BITCOIND_LOCKFILE in /etc/sysconfig/new808coind
+lockfile=${BITCOIND_LOCKFILE-/var/lock/subsys/new808coind}
+
+# new808coind defaults to /usr/bin/new808coind, override with BITCOIND_BIN
+bitcoind=${BITCOIND_BIN-/usr/bin/new808coind}
+
+# new808coind opts default to -disablewallet, override with BITCOIND_OPTS
+bitcoind_opts=${BITCOIND_OPTS}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $bitcoind $bitcoind_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
