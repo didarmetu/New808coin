@@ -238,7 +238,7 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     QActionGroup* tabGroup = new QActionGroup(this);
 
     QPixmap overviewIconInactive(":/icons/overview");
-    QPixmap overviewIconActive(":icons/overview");
+    QPixmap overviewIconActive(":icons/overview_active");
     QIcon overviewIcon(overviewIconInactive);
 
     overviewIcon.addPixmap(overviewIconActive,QIcon::Selected,QIcon::On);
@@ -258,7 +258,7 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     tabGroup->addAction(overviewAction);
 
     QPixmap sendIconInactive(":/icons/send");
-    QPixmap sendIconActive(":icons/send");
+    QPixmap sendIconActive(":icons/send_active");
     QIcon sendIcon(sendIconInactive);
 
     sendIcon.addPixmap(sendIconActive,QIcon::Selected,QIcon::On);
@@ -278,7 +278,7 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     tabGroup->addAction(sendCoinsAction);
 
     QPixmap receiveIconInactive(":/icons/receiving_addresses");
-    QPixmap receiveIconActive(":icons/receiving_addresses");
+    QPixmap receiveIconActive(":icons/receiving_addresses_active");
     QIcon receiveIcon(receiveIconInactive);
 
     receiveIcon.addPixmap(receiveIconActive,QIcon::Selected,QIcon::On);
@@ -298,7 +298,7 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     tabGroup->addAction(receiveCoinsAction);
 
     QPixmap historyIconInactive(":/icons/history");
-    QPixmap historyIconActive(":icons/history");
+    QPixmap historyIconActive(":icons/history_active");
     QIcon historyIcon(historyIconInactive);
 
     historyIcon.addPixmap(historyIconActive,QIcon::Selected,QIcon::On);
@@ -322,7 +322,7 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     QSettings settings;
     if (settings.value("fShowMasternodesTab").toBool()) {
         QPixmap masternodesIconInactive(":/icons/masternodes");
-        QPixmap masternodesIconActive(":icons/masternodes");
+        QPixmap masternodesIconActive(":icons/masternodes_active");
         QIcon masternodesIcon(masternodesIconInactive);
 
         masternodesIcon.addPixmap(masternodesIconActive,QIcon::Selected,QIcon::On);
@@ -402,9 +402,9 @@ void BitcoinGUI::createActions(const NetworkStyle* networkStyle)
     openPeersAction->setStatusTip(tr("Show peers info"));
     openRepairAction = new QAction(QIcon(":/icons/options"), tr("Wallet &Repair"), this);
     openRepairAction->setStatusTip(tr("Show wallet repair options"));
-    openConfEditorAction = new QAction(QIcon(":/icons/edit_black"), tr("Open Wallet &Configuration File"), this);
+    openConfEditorAction = new QAction(QIcon(":/icons/edit"), tr("Open Wallet &Configuration File"), this);
     openConfEditorAction->setStatusTip(tr("Open configuration file"));
-    openMNConfEditorAction = new QAction(QIcon(":/icons/edit_black"), tr("Open &Masternode Configuration File"), this);
+    openMNConfEditorAction = new QAction(QIcon(":/icons/edit"), tr("Open &Masternode Configuration File"), this);
     openMNConfEditorAction->setStatusTip(tr("Open Masternode configuration file"));
     showBackupsAction = new QAction(QIcon(":/icons/browse"), tr("Show Automatic &Backups"), this);
     showBackupsAction->setStatusTip(tr("Show automatically created wallet backups"));

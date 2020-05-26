@@ -1033,7 +1033,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string notr="true">&lt;a href=&quot;https://bitcointalk.org&quot;&gt;https://bitcointalk.org&lt;/a&gt;</string>
+                        <string notr="true">&lt;a href=&quot;https://bitcointalk.org/index.php?topic=5237615&quot;&gt;https://bitcointalk.org/index.php?topic=5237615&lt;/a&gt;</string>
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

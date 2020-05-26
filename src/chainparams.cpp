@@ -46,12 +46,13 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (1, uint256("0x26021deaf4e4f9a3065221d051e2ac0a48c8e23a4df156df5313d4f1e649d86e"))
     (95, uint256("0x00000113dd3b781c1d5f0fa80a235a30d2c87f7fbb3154d8b52b9a49d994c959"))
     (808, uint256("0x00000001d246a448112ab2f07ab5c2fd583c3cda150a2ba12bd03809f150bb8a"))
-    (809, uint256("0x45e7bfb1864cf8825bf5ef67767fb30d9d474c521ac6b7f7868f5c2ef9fe74a1"));
+    (809, uint256("0x45e7bfb1864cf8825bf5ef67767fb30d9d474c521ac6b7f7868f5c2ef9fe74a1"))
+    (110000, uint256("0xef640b2f3f4ab59b1a7575089cb4d30ab1f4a97c71b9bc59dfe25ef9173aafa4"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1583252124, // * UNIX timestamp of last checkpoint block
-    813,          // * total number of transactions between genesis and last checkpoint
+    1590478935, // * UNIX timestamp of last checkpoint block
+    232538,          // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
     500        // * estimated number of transactions per day after checkpoint
 };
@@ -97,7 +98,7 @@ public:
         nTargetSpacing = 808;  // New808coin: 808 sec blocks during POW (block 1-808)
         nMaturity = 5; // 6 block maturity (+1 elsewhere)
         nMasternodeCountDrift = 20;
-        nMaxMoneyOut = 21000000 * COIN; // 5 million max supply
+        nMaxMoneyOut = 21000000 * COIN; // 21 million max supply
         nLastPOWBlock = 808;
         nModifierUpdateBlock = 2; // we use the version 2 for N808
 
@@ -173,7 +174,7 @@ public:
 
         nPoolMaxTransactions = 3;
         strSporkKey = "04cc17389379a0e323f53ea504d38cd71f43dc22f597805fed33a51b05ced1a3ae0db84089985f351b3737721736a82f58c8bd529f79c8ffe57e922bda792146ab";
-        strMasternodePoolDummyAddress = "NSJVWUkt6HtSCY2SaJ2akeyJUg8bg1hW3S";
+        strMasternodePoolDummyAddress = "NTmidY7k3cPwoe48rXVcNY2fYAcpeLRmij";
         nStartMasternodePayments = 4070908800;
 
         nBudget_Fee_Confirmations = 6; // Number of confirmations for the finalization fee

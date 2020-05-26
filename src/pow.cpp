@@ -37,6 +37,10 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         uint256 bnTargetLimit = (~uint256(0) >> 24);
         int64_t nTargetSpacing = 60; // 60 second blocks
         int64_t nTargetTimespan = 60 * 40;
+        if (pindexLast->nHeight > 130000) {
+            int64_t nTargetSpacing = 4 * 60; // 4 min blocks
+            int64_t nTargetTimespan = 60 * 80;  //retargeting every 80 minuts
+        }
 
         int64_t nActualSpacing = 0;
         if (pindexLast->nHeight != 0)

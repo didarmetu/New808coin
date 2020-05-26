@@ -1642,29 +1642,47 @@ int64_t GetBlockValue(int nHeight)
         else
             nSubsidy = 40 * COIN;
     }
-    else if (nHeight > 100000 && nHeight <= 333333){
+    else if (nHeight > 100000 && nHeight <= 130000){
         if ( nHeight % 808 == 807 )
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 33 * COIN;
-    }
-    else if (nHeight > 333333 && nHeight <= 500000){
+    }   // changed for mandatory update v4.0.0.0
+    else if (nHeight > 130000 && nHeight <= 140000){
         if ( nHeight % 808 == 807 )
             nSubsidy = 808 * COIN;
         else
-            nSubsidy = 21 * COIN;
+            nSubsidy = 4 * COIN;
     }
-    else if (nHeight > 500000 && nHeight <= 1000000){
+    else if (nHeight > 140000 && nHeight <= 200000){
         if ( nHeight % 808 == 807 )
             nSubsidy = 808 * COIN;
         else
-            nSubsidy = 7 * COIN;
+            nSubsidy = 8 * COIN;
+    }
+    else if (nHeight > 200000 && nHeight <= 300000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 16 * COIN;
+    }
+    else if (nHeight > 300000 && nHeight <= 400000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 32 * COIN;
+    }
+    else if (nHeight > 400000 && nHeight <= 500000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 64 * COIN;
     }
     else {
         if ( nHeight % 808 == 807 )
             nSubsidy = 808 * COIN;
         else
-            nSubsidy = 1 * COIN;
+            nSubsidy = 100 * COIN;
     }
 
     // Check if we reached the coin max supply.
@@ -1682,14 +1700,13 @@ int64_t GetBlockValue(int nHeight)
 int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCount)
 {
     int64_t ret = 0;
-
-    // No rewards till masternode activation.
-    if (nHeight < Params().LAST_POW_BLOCK() || blockValue == 0)
-        return 0;
-
-    // Check if we reached coin supply
-    ret = blockValue * 0.85; // 85% of block reward
-
+    if (nHeight < Params().LAST_POW_BLOCK() || blockValue == 0) { ret = blockValue * 0;
+    } else if (nHeight > Params().LAST_POW_BLOCK() && nHeight <= 140000)     { ret = blockValue * 0.85;
+    } else if (nHeight > 140000 && nHeight <= 200000)  { ret = blockValue * 0.86;
+    } else if (nHeight > 200000 && nHeight <= 300000) { ret = blockValue * 0.87;
+    } else if (nHeight > 300000 && nHeight <= 400000) { ret = blockValue * 0.88;
+    } else if (nHeight > 400000 && nHeight <= 500000) { ret = blockValue * 0.89;
+    } else if (nHeight > 500000) { ret = blockValue * 0.90; }
     return ret;
 }
 
