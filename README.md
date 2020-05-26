@@ -21,8 +21,8 @@ Masternode Collateral is changing with block height and the minimum stake age ha
 <tr><td>Difficulty Retargeting</td><td>Every 80 minutes</td></tr>
 <tr><td>Premine</td><td>2,100,000 (2,1 million) N808</td></tr>
 <tr><td>Total supply</td><td>21,000,000 (21 million) N808</td></tr>
-<tr><td>RPC Port</td><td>33114</td></tr>
-<tr><td>P2P/MN port</td><td>30114</td></tr>
+<tr><td>RPC Port</td><td>8089</td></tr>
+<tr><td>P2P/MN port</td><td>33808</td></tr>
 </table>
 
 
