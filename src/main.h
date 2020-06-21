@@ -260,23 +260,6 @@ int GetInputAgeIX(uint256 nTXHash, CTxIn& vin);
 bool GetCoinAge(const CTransaction& tx, unsigned int nTxTime, uint64_t& nCoinAge);
 int GetIXConfirmations(uint256 nTXHash);
 
-inline int64_t GetMasterNodeCollateral(int nHeight){
-    if (nHeight <= 130000 && nHeight > 0) {
-        return 2500;
-    } else if (nHeight <= 140000 && nHeight > 130000) {
-        return 5000;
-    } else if (nHeight <= 200000 && nHeight > 140000) {
-        return 10000;
-    } else if (nHeight <= 300000 && nHeight > 200000) {
-        return 20000;
-    } else if (nHeight <= 400000 && nHeight > 300000) {
-        return 40000;
-    } else if (nHeight <= 500000 && nHeight > 400000) {
-        return 80000;
-    }
-    return 100000;
-}
-
 struct CNodeStateStats {
     int nMisbehavior;
     int nSyncHeight;

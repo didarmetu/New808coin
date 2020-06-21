@@ -47,11 +47,10 @@ Masternode Collateral is changing with block height and the minimum stake age ha
 <tr><td>Phase 2</td><td>2,500 N808</td><td>42,001-100,000</td><td>40 N808</td><td>85% (34.00 N808)</td><td>15% (6.00 N808)</td></tr>
 <tr><td>Phase 3</td><td>2,500 N808</td><td>100,001-130,000</td><td>33 N808</td><td>85% (28.05 N808)</td><td>15% (4.95 N808)</td></tr>
 <tr><td>Phase 4</td><td>5,000 N808</td><td>130,001-140,000</td><td>4 N808</td><td>85% (3.40 N808)</td><td>15% (0.60 N808)</td></tr>
-<tr><td>Phase 5</td><td>10,000 N808</td><td>140,001-200,000</td><td>8 N808</td><td>86% (6.88 N808)</td><td>14% (1.12 N808)</td></tr>
-<tr><td>Phase 6</td><td>20,000 N808</td><td>200,001-300,000</td><td>16 N808</td><td>87% (13.92 N808)</td><td>13% (2.08 N808)</td></tr>
-<tr><td>Phase 7</td><td>40,000 N808</td><td>300,001-400,000</td><td>32 N808</td><td>88% (28.16 N808)</td><td>12% (3.84 N808)</td></tr>
-<tr><td>Phase 8</td><td>80,000 N808</td><td>400,001-500,000</td><td>64 N808</td><td>89% (56.96 N808)</td><td>11% (7.04 N808)</td></tr>
-<tr><td>Phase 9</td><td>100,000 N808</td><td>500,001- ∞</td><td>100 N808</td><td>90% (90.00 N808)</td><td>10% (10.00 N808)</td></tr>
+<tr><td>Phase 5</td><td>10,000 N808</td><td>140,001-155,000</td><td>8 N808</td><td>86% (6.88 N808)</td><td>14% (1.12 N808)</td></tr>
+<tr><td>Phase 6</td><td>25,000 N808</td><td>155,001-400,000</td><td>16 N808</td><td>87% (13.92 N808)</td><td>13% (2.08 N808)</td></tr>
+<tr><td>Phase 7</td><td>25,000 N808</td><td>400,001-500,000</td><td>32 N808</td><td>88% (28.16 N808)</td><td>12% (3.84 N808)</td></tr>
+<tr><td>Phase 8</td><td>25,000 N808</td><td>500,001- ∞</td><td>64 N808</td><td>89% (56.96 N808)</td><td>11% (7.04 N808)</td></tr>
 </table>
 
 <table>

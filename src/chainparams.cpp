@@ -47,14 +47,15 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (95, uint256("0x00000113dd3b781c1d5f0fa80a235a30d2c87f7fbb3154d8b52b9a49d994c959"))
     (808, uint256("0x00000001d246a448112ab2f07ab5c2fd583c3cda150a2ba12bd03809f150bb8a"))
     (809, uint256("0x45e7bfb1864cf8825bf5ef67767fb30d9d474c521ac6b7f7868f5c2ef9fe74a1"))
-    (110000, uint256("0xef640b2f3f4ab59b1a7575089cb4d30ab1f4a97c71b9bc59dfe25ef9173aafa4"));
+    (110000, uint256("0xef640b2f3f4ab59b1a7575089cb4d30ab1f4a97c71b9bc59dfe25ef9173aafa4"))
+    (137000, uint256("0x23297664299afc29f59def13e203e72e6bb8d966bf6e66c775d079dc0493f597"));
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
-    1590478935, // * UNIX timestamp of last checkpoint block
-    232538,          // * total number of transactions between genesis and last checkpoint
+    1592116300, // * UNIX timestamp of last checkpoint block
+    290981,          // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
-    500        // * estimated number of transactions per day after checkpoint
+    300        // * estimated number of transactions per day after checkpoint
 };
 
 static Checkpoints::MapCheckpoints mapCheckpointsTestnet =
@@ -173,7 +174,7 @@ public:
         fHeadersFirstSyncingActive = false;
 
         nPoolMaxTransactions = 3;
-        strSporkKey = "04cc17389379a0e323f53ea504d38cd71f43dc22f597805fed33a51b05ced1a3ae0db84089985f351b3737721736a82f58c8bd529f79c8ffe57e922bda792146ab";
+        strSporkKey = "04abf44d11a8c22402b1aa0e604d7c51aaf382da59fb355fc60b0b83f10df91b5cf50e652c26ccef09f4a14b98c9913203c72553ec37563d7f733d59a90bbeaed3";
         strMasternodePoolDummyAddress = "NTmidY7k3cPwoe48rXVcNY2fYAcpeLRmij";
         nStartMasternodePayments = 4070908800;
 
