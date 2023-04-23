@@ -1,19 +1,22 @@
 ### What is New808coin(N808)?
 
-New808coin is a decentralized, peer-to-peer cryptocurrency with a primary focus on energy-efficiency and music. The New808coin Network makes use of only Proof-of-Stake mining, in the form of masternodes and staking. This means that the New808coin blockchain has a very low impact on the environment and ensures that scaling will be a smooth transition in future.
+New808coin (N808) is a decentralized, peer-to-peer cryptocurrency that was designed with a primary focus on energy efficiency and music. The New808coin network utilizes a Proof-of-Stake (PoS) consensus algorithm, which is based on a combination of masternodes and staking. This approach ensures that the New808coin blockchain has a low environmental impact and can easily scale to accommodate future growth.
 
-New808coin  uses a combination of Masternodes with PoS (Proof of stake) to secure the cryptocurrency network.
+One of the unique features of New808coin is its use of masternodes. These are specialized nodes on the network that perform advanced functions such as instant transactions, anonymous transactions, and decentralized governance. Masternodes are an integral part of the New808coin ecosystem, providing a higher level of security and reliability compared to other cryptocurrencies that rely solely on staking.
 
-The first consecutive blocks contain premine; and additionally the coins allocated for the user coin swap, destined for holders of the old PoW/PoS 808coin.
-Masternode Collateral is changing with block height and the minimum stake age has been set to 80.8 hours.
+In terms of mining, New808coin only supports PoS mining. This means that users can earn rewards by simply holding N808 in their wallets, instead of having to use expensive mining hardware. This approach promotes a more eco-friendly and cost-effective mining process, making it easier for users to participate in the network.
+
+At the launch of the New808coin network, there were premined coins and coins allocated for a user coin swap. The swap was designed for holders of the old PoW/PoS 808coin. Additionally, the Masternode Collateral changed until Phase 6 then its stable to 25,000 N808, and the minimum stake age has been set to 80.8 hours.
+
+Overall, New808coin is a promising cryptocurrency with a unique focus on energy efficiency and music. Its use of masternodes and PoS mining make it a more secure and reliable cryptocurrency, while also promoting a more eco-friendly and cost-effective mining process.
 
 ### Briefly New808coin Specification
 <table>
 <tr><td>Coin Name</td><td>New808coin</td></tr>
 <tr><td>Coin Ticker</td><td>N808</td></tr>
 <tr><td>Consensus mechanism</td><td>Masternode/PoS</td></tr>
-<tr><td>Masternode Collateral</td><td>2,500-100,000 N808</td></tr>
-<tr><td>Block reward</td><td>4-100 N808</td></tr>
+<tr><td>Masternode Collateral</td><td>2,500-25,000 N808</td></tr>
+<tr><td>Block reward</td><td>4-64 N808</td></tr>
 <tr><td>Masternode reward</td><td>85%-90%</td></tr>
 <tr><td>PoS reward</td><td>10%-15%</td></tr>
 <tr><td>Minimum Stake Age</td><td>80.8 hours</td></tr>
@@ -50,7 +53,11 @@ Masternode Collateral is changing with block height and the minimum stake age ha
 <tr><td>Phase 5</td><td>10,000 N808</td><td>140,001-155,000</td><td>8 N808</td><td>86% (6.88 N808)</td><td>14% (1.12 N808)</td></tr>
 <tr><td>Phase 6</td><td>25,000 N808</td><td>155,001-400,000</td><td>16 N808</td><td>87% (13.92 N808)</td><td>13% (2.08 N808)</td></tr>
 <tr><td>Phase 7</td><td>25,000 N808</td><td>400,001-500,000</td><td>32 N808</td><td>88% (28.16 N808)</td><td>12% (3.84 N808)</td></tr>
-<tr><td>Phase 8</td><td>25,000 N808</td><td>500,001- ∞</td><td>64 N808</td><td>89% (56.96 N808)</td><td>11% (7.04 N808)</td></tr>
+<tr><td>Phase 8</td><td>25,000 N808</td><td>500,001-525,000</td><td>64 N808</td><td>89% (56.96 N808)</td><td>11% (7.04 N808)</td></tr>
+<tr><td>Phase 9</td><td>25,000 N808</td><td>525,001-550,000</td><td>16 N808</td><td>87% (13.92 N808)</td><td>13% (2.08 N808)</td></tr>
+<tr><td>Phase 10</td><td>25,000 N808</td><td>550,001-575,000</td><td>8 N808</td><td>86% (6.88 N808)</td><td>14% (1.12 N808)</td></tr>
+<tr><td>Phase 11</td><td>25,000 N808</td><td>575,001-600,000</td><td>4 N808</td><td>85% (3.40 N808)</td><td>15% (0.60 N808)</td></tr>
+<tr><td>Phase 12</td><td>25,000 N808</td><td>600,001- ∞</td><td>2 N808</td><td>85% (1.70 N808)</td><td>15% (0.30 N808)</td></tr>
 </table>
 
 <table>

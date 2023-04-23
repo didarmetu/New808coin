@@ -1671,12 +1671,36 @@ int64_t GetBlockValue(int nHeight)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 32 * COIN;
+    }  // changed for mandatory update v4.2.0.0
+    else if (nHeight > 500000 && nHeight <= 525000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 64 * COIN;
+    }
+    else if (nHeight > 525000 && nHeight <= 550000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 16 * COIN;
+    }
+    else if (nHeight > 550000 && nHeight <= 575000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 8 * COIN;
+    }
+    else if (nHeight > 575000 && nHeight <= 600000){
+        if ( nHeight % 808 == 807 )
+            nSubsidy = 808 * COIN;
+        else
+            nSubsidy = 4 * COIN;
     }
     else {
         if ( nHeight % 808 == 807 )
             nSubsidy = 808 * COIN;
         else
-            nSubsidy = 64 * COIN;
+            nSubsidy = 2 * COIN;
     }
 
     // Check if we reached the coin max supply.
@@ -1699,7 +1723,11 @@ int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCou
     } else if (nHeight > 140000 && nHeight <= 155000)  { ret = blockValue * 0.86;
     } else if (nHeight > 155000 && nHeight <= 400000) { ret = blockValue * 0.87;
     } else if (nHeight > 400000 && nHeight <= 500000) { ret = blockValue * 0.88;
-    } else if (nHeight > 500000) { ret = blockValue * 0.89; }
+    } else if (nHeight > 500000 && nHeight <= 525000) { ret = blockValue * 0.89;
+    } else if (nHeight > 525000 && nHeight <= 550000) { ret = blockValue * 0.87;
+    } else if (nHeight > 550000 && nHeight <= 575000) { ret = blockValue * 0.86;
+    } else if (nHeight > 575000 && nHeight <= 600000) { ret = blockValue * 0.85;
+    } else if (nHeight > 600000) { ret = blockValue * 0.85; }
     return ret;
 }
 
