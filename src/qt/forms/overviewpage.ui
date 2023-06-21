@@ -991,7 +991,7 @@
                         <string notr="true">font: 87 9pt &quot;Arial Black&quot;;</string>
                        </property>
                        <property name="text">
-                        <string>Reddit:</string>
+                        <string>New808Punks NFTs:</string>
                        </property>
                       </widget>
                      </item>
@@ -1004,7 +1004,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string notr="true">&lt;a href=&quot;https://www.reddit.com/r/New808coin&quot;&gt;https://www.reddit.com/r/New808coin&lt;/a&gt;</string>
+                        <string notr="true">&lt;a href=&quot;https://opensea.io/collection/new808punks&quot;&gt;https://opensea.io/collection/new808punks&lt;/a&gt;</string>
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

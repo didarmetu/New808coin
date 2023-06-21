@@ -75,7 +75,6 @@ Overall, New808coin is a promising cryptocurrency with a unique focus on energy 
 * Discord: https://discord.gg/qvPTgdW
 * Explorer-1: http://n808explorer.tk/
 * Explorer-2: https://openchains.info/coin/n808
-* Explorer-3: http://simpleexplorer.info/coin/new-808-coin
 * Wallets: https://github.com/didarmetu/New808coin/releases
 * White Paper: https://new808.tk/white-paper
 * GitHub Source: https://github.com/didarmetu/New808coin
@@ -84,6 +83,6 @@ Overall, New808coin is a promising cryptocurrency with a unique focus on energy 
 * Telegram: https://t.me/new808coin
 * Reddit: https://www.reddit.com/r/New808coin
 * Exchange: https://fiberchange.com
-* For phones: https://blockfolio.com/#get-app
 * Coinpaprika: https://coinpaprika.com/coin/n808-new808coin
 * Coingecko: https://www.coingecko.com/en/coins/new808coin
+* New808Punks NFTs: https://opensea.io/collection/new808punks
