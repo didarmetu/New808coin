@@ -71,12 +71,11 @@ Overall, New808coin is a promising cryptocurrency with a unique focus on energy 
 
 ### Links
 
-* Webside: https://new808.tk
+* Webside: https://new808coin.com
 * Discord: https://discord.gg/qvPTgdW
-* Explorer-1: https://explorer.new808.tk/
-* Explorer-2: https://openchains.info/coin/n808
+* Explorer-1: https://explorer.new808coin.com
 * Wallets: https://github.com/didarmetu/New808coin/releases
-* White Paper: https://new808.tk/white-paper
+* White Paper: https://new808coin.com/white-paper
 * GitHub Source: https://github.com/didarmetu/New808coin
 * Bitcointalk: https://bitcointalk.org/index.php?topic=5237615
 * Twitter: https://twitter.com/new808coin
