@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include <boost/bind.hpp>
+
 #include <QDateTime>
 #include <QDebug>
 #include <QTimer>

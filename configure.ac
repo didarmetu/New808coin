@@ -56,6 +56,12 @@ esac
 dnl Require C++11 compiler (no GNU extensions)
 AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory])
 
+dnl GCC 11 and later default to C++17. This codebase still uses C++11-era
+dnl constructs (including dynamic exception specifications) and has namespace
+dnl collisions with std::filesystem, so select its intended language version
+dnl explicitly instead of accepting the compiler default.
+CXXFLAGS="$CXXFLAGS -std=c++11"
+
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
 m4_ifdef([AC_PROG_OBJCXX],[
@@ -195,7 +201,7 @@ fi
 if test "x$CXXFLAGS_overridden" = "xno"; then
   CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter"
 fi
-CPPFLAGS="$CPPFLAGS -DBOOST_SPIRIT_THREADSAFE -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
+CPPFLAGS="$CPPFLAGS -DBOOST_SPIRIT_THREADSAFE -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
 AC_ARG_WITH([utils],
   [AS_HELP_STRING([--with-utils],
@@ -780,13 +786,16 @@ else
   fi
 fi
 
-AC_CHECK_LIB([crypto],[RAND_egd],[],[
+dnl RAND_egd was removed in OpenSSL 3.0, so its absence is no longer a valid
+dnl way to distinguish LibreSSL from OpenSSL. Check LibreSSL's version macro
+dnl directly instead.
+AC_CHECK_DECL([LIBRESSL_VERSION_NUMBER], [
   AC_ARG_WITH([libressl],
     [AS_HELP_STRING([--with-libressl],[Build with system LibreSSL (default is no; DANGEROUS; NOT SUPPORTED)])],
     [AC_MSG_WARN([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])],
     [AC_MSG_ERROR([Detected LibreSSL: This is NOT supported, and may break consensus compatibility!])]
   )
-])
+], [], [[#include <openssl/opensslv.h>]])
 
 dnl univalue check
 

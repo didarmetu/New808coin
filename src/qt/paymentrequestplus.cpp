@@ -133,6 +133,8 @@ bool PaymentRequestPlus::getMerchant(X509_STORE* certStore, QString& merchant) c
     }
 
     char* website = NULL;
+    EVP_MD_CTX* ctx = NULL;
+    EVP_PKEY* pubkey = NULL;
     bool fResult = true;
     try {
         if (!X509_STORE_CTX_init(store_ctx, certStore, signing_cert, chain)) {
@@ -154,12 +156,12 @@ bool PaymentRequestPlus::getMerchant(X509_STORE* certStore, QString& merchant) c
         std::string data_to_verify; // Everything but the signature
         rcopy.SerializeToString(&data_to_verify);
 
-        EVP_MD_CTX ctx;
-        EVP_PKEY* pubkey = X509_get_pubkey(signing_cert);
-        EVP_MD_CTX_init(&ctx);
-        if (!EVP_VerifyInit_ex(&ctx, digestAlgorithm, NULL) ||
-            !EVP_VerifyUpdate(&ctx, data_to_verify.data(), data_to_verify.size()) ||
-            !EVP_VerifyFinal(&ctx, (const unsigned char*)paymentRequest.signature().data(), paymentRequest.signature().size(), pubkey)) {
+        ctx = EVP_MD_CTX_new();
+        pubkey = X509_get_pubkey(signing_cert);
+        if (ctx == NULL || pubkey == NULL ||
+            !EVP_VerifyInit_ex(ctx, digestAlgorithm, NULL) ||
+            !EVP_VerifyUpdate(ctx, data_to_verify.data(), data_to_verify.size()) ||
+            !EVP_VerifyFinal(ctx, (const unsigned char*)paymentRequest.signature().data(), paymentRequest.signature().size(), pubkey)) {
             throw SSLVerifyError("Bad signature, invalid PaymentRequest.");
         }
 
@@ -179,6 +181,8 @@ bool PaymentRequestPlus::getMerchant(X509_STORE* certStore, QString& merchant) c
 
     if (website)
         delete[] website;
+    EVP_MD_CTX_free(ctx);
+    EVP_PKEY_free(pubkey);
     X509_STORE_CTX_free(store_ctx);
     for (unsigned int i = 0; i < certs.size(); i++)
         X509_free(certs[i]);

@@ -38,6 +38,7 @@
 #endif
 
 #include <boost/filesystem.hpp>
+#include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
 // Dump addresses to peers.dat every 15 minutes (900s)

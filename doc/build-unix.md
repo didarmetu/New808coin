@@ -54,6 +54,43 @@ compilation will take much longer due to swap thrashing.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
+
+### Ubuntu 24.04 LTS
+
+Install the native build dependencies for the daemon, command-line tools, and
+Qt wallet:
+
+```bash
+sudo apt update
+sudo apt install build-essential libtool autotools-dev automake autoconf pkg-config \
+    libssl-dev libevent-dev libboost-system-dev libboost-filesystem-dev \
+    libboost-program-options-dev libboost-thread-dev libboost-chrono-dev \
+    libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev qtbase5-dev \
+    qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler \
+    libqrencode-dev
+```
+
+Ubuntu 24.04 provides Berkeley DB 5.3. To build a new wallet against that
+system library, explicitly acknowledge the incompatible wallet format:
+
+```bash
+./autogen.sh
+./configure --with-incompatible-bdb
+make -j"$(nproc)"
+```
+
+For a daemon and command-line build without the Qt wallet:
+
+```bash
+./configure --without-gui --with-incompatible-bdb
+make -j"$(nproc)"
+```
+
+Do not open an existing Berkeley DB 4.8 wallet with a Berkeley DB 5.3 build.
+To preserve compatibility with existing wallets and released binaries, build
+Berkeley DB 4.8 as described in the Berkeley DB section below, omit
+`--with-incompatible-bdb`, and always keep a verified wallet backup.
+
 Build requirements:
 
 	sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev
