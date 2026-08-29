@@ -62,12 +62,13 @@ Qt wallet:
 
 ```bash
 sudo apt update
-sudo apt install build-essential libtool autotools-dev automake autoconf pkg-config \
+sudo apt install -y \
+    build-essential libtool autotools-dev automake autoconf pkg-config \
     libssl-dev libevent-dev libboost-system-dev libboost-filesystem-dev \
     libboost-program-options-dev libboost-thread-dev libboost-chrono-dev \
-    libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev qtbase5-dev \
-    qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler \
-    libqrencode-dev
+    libboost-test-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev \
+    qtbase5-dev qttools5-dev qttools5-dev-tools libprotobuf-dev \
+    protobuf-compiler libqrencode-dev
 ```
 
 Ubuntu 24.04 provides Berkeley DB 5.3. To build a new wallet against that
@@ -90,6 +91,41 @@ Do not open an existing Berkeley DB 4.8 wallet with a Berkeley DB 5.3 build.
 To preserve compatibility with existing wallets and released binaries, build
 Berkeley DB 4.8 as described in the Berkeley DB section below, omit
 `--with-incompatible-bdb`, and always keep a verified wallet backup.
+
+### Ubuntu 24.04 runtime dependencies
+
+When copying the compiled daemon to another Ubuntu 24.04 server, install the
+required runtime libraries:
+
+```bash
+sudo apt update
+sudo apt install -y \
+    libzmq5 \
+    libssl3t64 \
+    libevent-2.1-7t64 \
+    libevent-pthreads-2.1-7t64 \
+    libboost-system1.83.0 \
+    libboost-filesystem1.83.0 \
+    libboost-program-options1.83.0 \
+    libboost-thread1.83.0 \
+    libboost-chrono1.83.0t64 \
+    libdb5.3++t64 \
+    libminiupnpc17
+```
+
+Check for missing shared libraries:
+
+```bash
+ldd ./new808coind | grep "not found"
+```
+
+If the command produces no output, all required shared libraries are installed.
+
+Start the daemon:
+
+```bash
+./new808coind -daemon
+```
 
 Build requirements:
 
