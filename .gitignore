@@ -124,3 +124,9 @@ qa/pull-tester/test.*/*
 .idea
 CMakeLists.txt
 cmake-build-debug
+
+# Standalone smart contracts
+New808coinBEP20Contract.sol
+New808coinERC20Contract.sol
+New808coinSale.sol
+New808coinTRC20Contract.sol
