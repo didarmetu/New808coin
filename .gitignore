@@ -97,6 +97,7 @@ qrc_*.cpp
 
 # Mac specific
 .DS_Store
+patches/.DS_Store
 build
 
 #lcov
