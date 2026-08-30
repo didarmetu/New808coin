@@ -1,0 +1,111 @@
+name: macOS Universal Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - macos-universal
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: macos-15-intel
+          - arch: arm64
+            runner: macos-15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Show build environment
+        run: |
+          uname -a
+          uname -m
+          xcodebuild -version
+          clang++ --version
+          brew --version
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            boost \
+            openssl@3.5 \
+            libevent \
+            zeromq \
+            miniupnpc \
+            qt@5 \
+            protobuf@21 \
+            qrencode \
+            berkeley-db@4
+
+      - name: Configure environment
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          QT_PREFIX="$(brew --prefix qt@5)"
+          OPENSSL_PREFIX="$(brew --prefix openssl@3.5)"
+          PROTOBUF_PREFIX="$(brew --prefix protobuf@21)"
+          BDB_PREFIX="$(brew --prefix berkeley-db@4)"
+
+          echo "$QT_PREFIX/bin" >> "$GITHUB_PATH"
+          echo "$PROTOBUF_PREFIX/bin" >> "$GITHUB_PATH"
+
+          echo "CPPFLAGS=-I$OPENSSL_PREFIX/include -I$BDB_PREFIX/include" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$OPENSSL_PREFIX/lib -L$BDB_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$QT_PREFIX/lib/pkgconfig:$OPENSSL_PREFIX/lib/pkgconfig:$PROTOBUF_PREFIX/lib/pkgconfig:$BREW_PREFIX/lib/pkgconfig" >> "$GITHUB_ENV"
+
+      - name: Generate build system
+        run: ./autogen.sh
+
+      - name: Configure
+        run: |
+          ./configure \
+            --disable-tests \
+            --with-gui=qt5
+
+      - name: Compile
+        run: make -j"$(sysctl -n hw.logicalcpu)"
+
+      - name: Show compiled architectures
+        run: |
+          find src -type f -perm -111 -maxdepth 3 -print
+          find src -type f -perm -111 -maxdepth 3 \
+            -exec file {} \;
+
+      - name: Collect build
+        run: |
+          mkdir -p "macos-${{ matrix.arch }}"
+
+          find src -type f \( \
+            -name "new808coind" -o \
+            -name "new808coin-cli" -o \
+            -name "new808coin-tx" \
+          \) -exec cp {} "macos-${{ matrix.arch }}/" \;
+
+          if [ -d src/qt/New808coin-Qt.app ]; then
+            cp -R src/qt/New808coin-Qt.app \
+              "macos-${{ matrix.arch }}/"
+          fi
+
+          if [ -d src/qt/new808coin-qt.app ]; then
+            cp -R src/qt/new808coin-qt.app \
+              "macos-${{ matrix.arch }}/"
+          fi
+
+      - name: Upload architecture build
+        uses: actions/upload-artifact@v4
+        with:
+          name: new808coin-macos-${{ matrix.arch }}
+          path: macos-${{ matrix.arch }}
+          if-no-files-found: error
