@@ -70,7 +70,7 @@ jobs:
 
           cd build_unix
 
-          ../dist/configure             --prefix="$BDB_PREFIX"             --enable-cxx             --disable-shared             --disable-replication
+          CFLAGS="-Wno-error=implicit-function-declaration" ../dist/configure             --prefix="$BDB_PREFIX"             --enable-cxx             --disable-shared             --disable-replication
 
           make -j"$(sysctl -n hw.logicalcpu)"
           make install
