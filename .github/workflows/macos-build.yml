@@ -192,18 +192,16 @@ jobs:
             -d "$APP_FRAMEWORKS" \
             -p '@executable_path/../Frameworks/'
 
-          for binary in \
-            "$STAGE/bin/new808coind" \
-            "$STAGE/bin/new808coin-cli" \
-            "$STAGE/bin/new808coin-tx"
-          do
-            dylibbundler \
-              -od \
-              -b \
-              -x "$binary" \
-              -d "$STAGE/lib" \
-              -p '@executable_path/../lib/'
-          done
+          # Bundle dependencies for all CLI executables in one pass.
+          # Using -od separately would erase libraries copied by earlier passes.
+          dylibbundler \
+            -od \
+            -b \
+            -x "$STAGE/bin/new808coind" \
+            -x "$STAGE/bin/new808coin-cli" \
+            -x "$STAGE/bin/new808coin-tx" \
+            -d "$STAGE/lib" \
+            -p '@executable_path/../lib/'
 
           # macdeployqt copies Qt plugins and rewrites their dependencies,
           # but Homebrew Qt plugins retain an absolute LC_ID_DYLIB.
