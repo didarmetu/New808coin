@@ -10,9 +10,42 @@
 #include <openssl/bn.h>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
+#include <openssl/opensslv.h>
 
 namespace
 {
+
+static void GetECDSASigValues(
+    const ECDSA_SIG* sig,
+    const BIGNUM** sig_r,
+    const BIGNUM** sig_s)
+{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    *sig_r = sig->r;
+    *sig_s = sig->s;
+#else
+    ECDSA_SIG_get0(sig, sig_r, sig_s);
+#endif
+}
+
+static bool SetECDSASigValues(
+    ECDSA_SIG* sig,
+    BIGNUM* sig_r,
+    BIGNUM* sig_s)
+{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    if (sig == NULL || sig_r == NULL || sig_s == NULL)
+        return false;
+
+    BN_clear_free(sig->r);
+    BN_clear_free(sig->s);
+    sig->r = sig_r;
+    sig->s = sig_s;
+    return true;
+#else
+    return ECDSA_SIG_set0(sig, sig_r, sig_s) == 1;
+#endif
+}
 /**
  * Perform ECDSA key recovery (see SEC1 4.1.6) for curves over (mod p)-fields
  * recid selects which key is recovered
@@ -24,7 +57,7 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY* eckey, ECDSA_SIG* ecsig, const unsigned ch
 
     const BIGNUM* sig_r = NULL;
     const BIGNUM* sig_s = NULL;
-    ECDSA_SIG_get0(ecsig, &sig_r, &sig_s);
+    GetECDSASigValues(ecsig, &sig_r, &sig_s);
 
     int ret = 0;
     BN_CTX* ctx = NULL;
@@ -221,7 +254,7 @@ bool CECKey::Recover(const uint256& hash, const unsigned char* p64, int rec)
     ECDSA_SIG* sig = ECDSA_SIG_new();
     BIGNUM* sig_r = BN_bin2bn(&p64[0], 32, NULL);
     BIGNUM* sig_s = BN_bin2bn(&p64[32], 32, NULL);
-    if (sig == NULL || sig_r == NULL || sig_s == NULL || !ECDSA_SIG_set0(sig, sig_r, sig_s)) {
+    if (sig == NULL || sig_r == NULL || sig_s == NULL || !SetECDSASigValues(sig, sig_r, sig_s)) {
         BN_free(sig_r);
         BN_free(sig_s);
         ECDSA_SIG_free(sig);
