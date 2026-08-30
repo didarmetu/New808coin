@@ -48,6 +48,7 @@ jobs:
             qt@5 \
             protobuf@21 \
             qrencode \
+            dylibbundler
 
       - name: Build Berkeley DB 4.8
         run: |
@@ -86,8 +87,9 @@ jobs:
           echo "$QT_PREFIX/bin" >> "$GITHUB_PATH"
           echo "$PROTOBUF_PREFIX/bin" >> "$GITHUB_PATH"
 
-          echo "CPPFLAGS=-I$OPENSSL_PREFIX/include -I$BDB_PREFIX/include" >> "$GITHUB_ENV"
-          echo "LDFLAGS=-L$OPENSSL_PREFIX/lib -L$BDB_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I$BREW_PREFIX/include -I$OPENSSL_PREFIX/include -I$BDB_PREFIX/include" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$BREW_PREFIX/lib -L$OPENSSL_PREFIX/lib -L$BDB_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=$QT_PREFIX/lib/pkgconfig:$OPENSSL_PREFIX/lib/pkgconfig:$PROTOBUF_PREFIX/lib/pkgconfig:$BREW_PREFIX/lib/pkgconfig" >> "$GITHUB_ENV"
 
       - name: Generate build system
@@ -99,7 +101,8 @@ jobs:
             --disable-tests \
             --with-gui=qt5 \
             --with-boost="$(brew --prefix boost)" \
-            --with-boost-libdir="$(brew --prefix boost)/lib"
+            --with-boost-libdir="$(brew --prefix boost)/lib" \
+            --with-miniupnpc
 
       - name: Compile all targets and collect diagnostics
         id: compile
@@ -129,89 +132,33 @@ jobs:
           find src -type f -perm -111 -maxdepth 3 \
             -exec file {} \;
 
-      - name: Collect build
-        run: |
-          mkdir -p "macos-${{ matrix.arch }}"
-
-          find src -type f \( \
-            -name "new808coind" -o \
-            -name "new808coin-cli" -o \
-            -name "new808coin-tx" -o \
-            -name "new808coin-qt" \
-          \) -exec cp {} "macos-${{ matrix.arch }}/" \;
-
-          if [ -d src/qt/New808coin-Qt.app ]; then
-            cp -R src/qt/New808coin-Qt.app \
-              "macos-${{ matrix.arch }}/"
-          fi
-
-          if [ -d src/qt/new808coin-qt.app ]; then
-            cp -R src/qt/new808coin-qt.app \
-              "macos-${{ matrix.arch }}/"
-          fi
-
-      - name: Upload architecture build
-        uses: actions/upload-artifact@v4
-        with:
-          name: new808coin-macos-${{ matrix.arch }}
-          path: macos-${{ matrix.arch }}
-          if-no-files-found: error
-
-  universal:
-    name: Create unsigned universal package
-    needs: build
-    runs-on: macos-15
-
-    steps:
-      - name: Download arm64 build
-        uses: actions/download-artifact@v5
-        with:
-          name: new808coin-macos-arm64
-          path: architecture/arm64
-
-      - name: Download x86_64 build
-        uses: actions/download-artifact@v5
-        with:
-          name: new808coin-macos-x86_64
-          path: architecture/x86_64
-
-      - name: Create universal binaries
+      - name: Create portable architecture package
         shell: bash
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-macOS-universal"
-          APP="$PACKAGE/New808coin-Qt.app"
+          STAGE="macos-${{ matrix.arch }}"
+          APP="$STAGE/New808coin-Qt.app"
           APP_MACOS="$APP/Contents/MacOS"
+          APP_FRAMEWORKS="$APP/Contents/Frameworks"
+          PLIST="$APP/Contents/Info.plist"
 
-          mkdir -p "$PACKAGE/bin" "$APP_MACOS"
+          mkdir -p \
+            "$STAGE/bin" \
+            "$STAGE/lib" \
+            "$APP_MACOS" \
+            "$APP_FRAMEWORKS"
 
-          for binary in new808coind new808coin-cli new808coin-tx; do
-            test -f "architecture/arm64/$binary"
-            test -f "architecture/x86_64/$binary"
+          cp src/new808coind "$STAGE/bin/"
+          cp src/new808coin-cli "$STAGE/bin/"
+          cp src/new808coin-tx "$STAGE/bin/"
+          cp src/qt/new808coin-qt "$APP_MACOS/"
 
-            lipo -create \
-              "architecture/arm64/$binary" \
-              "architecture/x86_64/$binary" \
-              -output "$PACKAGE/bin/$binary"
-
-            chmod +x "$PACKAGE/bin/$binary"
-          done
-
-          test -f architecture/arm64/new808coin-qt
-          test -f architecture/x86_64/new808coin-qt
-
-          lipo -create \
-            architecture/arm64/new808coin-qt \
-            architecture/x86_64/new808coin-qt \
-            -output "$APP_MACOS/new808coin-qt"
-
-          chmod +x "$APP_MACOS/new808coin-qt"
-
-      - name: Create application metadata
-        shell: bash
-        run: |
-          PLIST="New808coin-macOS-universal/New808coin-Qt.app/Contents/Info.plist"
+          chmod +x \
+            "$STAGE/bin/new808coind" \
+            "$STAGE/bin/new808coin-cli" \
+            "$STAGE/bin/new808coin-tx" \
+            "$APP_MACOS/new808coin-qt"
 
           plutil -create xml1 "$PLIST"
           plutil -insert CFBundleName \
@@ -229,19 +176,176 @@ jobs:
           plutil -insert CFBundleShortVersionString \
             -string "4.2.4.8" "$PLIST"
           plutil -insert LSMinimumSystemVersion \
-            -string "13.0" "$PLIST"
+            -string "15.0" "$PLIST"
           plutil -insert NSHighResolutionCapable \
             -bool true "$PLIST"
 
-      - name: Verify universal architectures
+          "$(brew --prefix qt@5)/bin/macdeployqt" \
+            "$APP" \
+            -always-overwrite \
+            -verbose=2
+
+          dylibbundler \
+            -od \
+            -b \
+            -x "$APP_MACOS/new808coin-qt" \
+            -d "$APP_FRAMEWORKS" \
+            -p '@executable_path/../Frameworks/'
+
+          for binary in \
+            "$STAGE/bin/new808coind" \
+            "$STAGE/bin/new808coin-cli" \
+            "$STAGE/bin/new808coin-tx"
+          do
+            dylibbundler \
+              -od \
+              -b \
+              -x "$binary" \
+              -d "$STAGE/lib" \
+              -p '@executable_path/../lib/'
+          done
+
+      - name: Audit architecture runtime libraries
         shell: bash
         run: |
           set -euo pipefail
 
-          find New808coin-macOS-universal -type f -perm -111 \
-            -print0 |
-          while IFS= read -r -d '' binary; do
-            echo "Checking $binary"
+          STAGE="macos-${{ matrix.arch }}"
+          REPORT="$STAGE/runtime-libraries-${{ matrix.arch }}.txt"
+          : > "$REPORT"
+
+          while IFS= read -r -d '' candidate; do
+            if file "$candidate" | grep -q "Mach-O"; then
+              {
+                echo "===== $candidate ====="
+                otool -L "$candidate"
+                echo
+              } >> "$REPORT"
+            fi
+          done < <(find "$STAGE" -type f -print0)
+
+          cat "$REPORT"
+
+          if grep -E \
+            '/opt/homebrew|/usr/local/(Cellar|opt)' \
+            "$REPORT"
+          then
+            echo "::error::Unbundled Homebrew dependency remains."
+            exit 1
+          fi
+
+      - name: Archive architecture package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STAGE="macos-${{ matrix.arch }}"
+
+          ditto -c -k \
+            --sequesterRsrc \
+            --keepParent \
+            "$STAGE" \
+            "$STAGE.zip"
+
+      - name: Upload architecture build
+        uses: actions/upload-artifact@v5
+        with:
+          name: new808coin-macos-${{ matrix.arch }}
+          path: macos-${{ matrix.arch }}.zip
+          if-no-files-found: error
+
+  universal:
+    name: Create portable unsigned universal package
+    needs: build
+    runs-on: macos-15
+
+    steps:
+      - name: Download arm64 package
+        uses: actions/download-artifact@v5
+        with:
+          name: new808coin-macos-arm64
+          path: architecture/arm64
+
+      - name: Download x86_64 package
+        uses: actions/download-artifact@v5
+        with:
+          name: new808coin-macos-x86_64
+          path: architecture/x86_64
+
+      - name: Extract architecture packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p extracted/arm64 extracted/x86_64
+
+          ditto -x -k \
+            architecture/arm64/macos-arm64.zip \
+            extracted/arm64
+
+          ditto -x -k \
+            architecture/x86_64/macos-x86_64.zip \
+            extracted/x86_64
+
+          test -d extracted/arm64/macos-arm64
+          test -d extracted/x86_64/macos-x86_64
+
+      - name: Merge universal package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARM_ROOT="extracted/arm64/macos-arm64"
+          X86_ROOT="extracted/x86_64/macos-x86_64"
+          PACKAGE="New808coin-macOS-universal"
+
+          ditto "$ARM_ROOT" "$PACKAGE"
+
+          rsync -a \
+            --ignore-existing \
+            "$X86_ROOT/" \
+            "$PACKAGE/"
+
+          while IFS= read -r -d '' arm_file; do
+            relative="${arm_file#"$ARM_ROOT"/}"
+            x86_file="$X86_ROOT/$relative"
+            output="$PACKAGE/$relative"
+
+            test -f "$x86_file" || continue
+
+            if file "$arm_file" | grep -q "Mach-O" &&
+               file "$x86_file" | grep -q "Mach-O"
+            then
+              temporary="$output.universal"
+
+              lipo -create \
+                "$arm_file" \
+                "$x86_file" \
+                -output "$temporary"
+
+              chmod --reference="$output" "$temporary" 2>/dev/null || \
+                chmod +x "$temporary"
+
+              mv "$temporary" "$output"
+            fi
+          done < <(find "$ARM_ROOT" -type f -print0)
+
+      - name: Verify main universal binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE="New808coin-macOS-universal"
+
+          binaries=(
+            "$PACKAGE/bin/new808coind"
+            "$PACKAGE/bin/new808coin-cli"
+            "$PACKAGE/bin/new808coin-tx"
+            "$PACKAGE/New808coin-Qt.app/Contents/MacOS/new808coin-qt"
+          )
+
+          for binary in "${binaries[@]}"; do
+            test -x "$binary"
             file "$binary"
             lipo -info "$binary"
 
@@ -250,63 +354,92 @@ jobs:
             grep -qw x86_64 <<< "$architectures"
           done
 
-      - name: Audit runtime libraries
+      - name: Audit complete universal package
         shell: bash
         run: |
           set -euo pipefail
 
-          report="New808coin-macOS-universal/runtime-libraries.txt"
-          : > "$report"
+          PACKAGE="New808coin-macOS-universal"
+          REPORT="$PACKAGE/runtime-libraries.txt"
+          : > "$REPORT"
 
-          find New808coin-macOS-universal -type f -perm -111 \
-            -print0 |
-          while IFS= read -r -d '' binary; do
-            {
-              echo "===== $binary ====="
-              otool -L "$binary"
-              echo
-            } >> "$report"
-          done
+          while IFS= read -r -d '' candidate; do
+            if file "$candidate" | grep -q "Mach-O"; then
+              {
+                echo "===== $candidate ====="
+                file "$candidate"
+                otool -L "$candidate"
+                echo
+              } >> "$REPORT"
+            fi
+          done < <(find "$PACKAGE" -type f -print0)
 
-          cat "$report"
+          cat "$REPORT"
 
-          if grep -E '/opt/homebrew|/usr/local/(Cellar|opt)' "$report"; then
-            echo "::warning::The universal binaries still reference Homebrew libraries."
+          if grep -E \
+            '/opt/homebrew|/usr/local/(Cellar|opt)' \
+            "$REPORT"
+          then
+            echo "::error::Universal package still references Homebrew."
+            exit 1
           fi
 
-      - name: Apply ad-hoc signature
+      - name: Apply ad-hoc signatures
         shell: bash
         run: |
           set -euo pipefail
 
-          for binary in \
-            New808coin-macOS-universal/bin/new808coind \
-            New808coin-macOS-universal/bin/new808coin-cli \
-            New808coin-macOS-universal/bin/new808coin-tx
-          do
-            codesign --force --sign - "$binary"
-          done
+          PACKAGE="New808coin-macOS-universal"
+          APP="$PACKAGE/New808coin-Qt.app"
 
-          codesign --force --deep --sign - \
-            New808coin-macOS-universal/New808coin-Qt.app
+          while IFS= read -r -d '' candidate; do
+            if file "$candidate" | grep -q "Mach-O"; then
+              codesign \
+                --force \
+                --sign - \
+                --timestamp=none \
+                "$candidate"
+            fi
+          done < <(find "$PACKAGE" -type f -print0)
 
-          codesign --verify --deep --strict \
-            New808coin-macOS-universal/New808coin-Qt.app
+          codesign \
+            --force \
+            --deep \
+            --sign - \
+            --timestamp=none \
+            "$APP"
 
-      - name: Create ZIP package
+          codesign --verify --deep --strict "$APP"
+
+      - name: Test command-line binaries
         shell: bash
         run: |
-          ditto -c -k --sequesterRsrc --keepParent \
-            New808coin-macOS-universal \
-            New808coin-4.2.4.8-macOS-universal-unsigned.zip
+          set -euo pipefail
 
-          shasum -a 256 \
-            New808coin-4.2.4.8-macOS-universal-unsigned.zip \
-            > New808coin-4.2.4.8-macOS-universal-unsigned.zip.sha256
+          PACKAGE="New808coin-macOS-universal"
 
-          cat New808coin-4.2.4.8-macOS-universal-unsigned.zip.sha256
+          "$PACKAGE/bin/new808coind" --version
+          "$PACKAGE/bin/new808coin-cli" --version
+          "$PACKAGE/bin/new808coin-tx" --version
 
-      - name: Upload universal package
+      - name: Create final ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE="New808coin-macOS-universal"
+          ZIP="New808coin-4.2.4.8-macOS-universal-unsigned.zip"
+
+          ditto -c -k \
+            --sequesterRsrc \
+            --keepParent \
+            "$PACKAGE" \
+            "$ZIP"
+
+          shasum -a 256 "$ZIP" > "$ZIP.sha256"
+          cat "$ZIP.sha256"
+
+      - name: Upload portable universal package
         uses: actions/upload-artifact@v5
         with:
           name: new808coin-macOS-universal-unsigned
