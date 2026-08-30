@@ -418,7 +418,7 @@ public:
             *this += n;
         }
         if (fNegative)
-            *this = 0 - *this;
+            BN_set_negative(this->bn, 1);
     }
 
     bool SetHexBool(const std::string& str)
@@ -448,7 +448,7 @@ public:
             *this += n;
         }
         if (fNegative)
-            *this = 0 - *this;
+            BN_set_negative(this->bn, 1);
 
         return true;
     }
