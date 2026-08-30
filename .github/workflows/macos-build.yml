@@ -205,6 +205,18 @@ jobs:
               -p '@executable_path/../lib/'
           done
 
+          # macdeployqt copies Qt plugins and rewrites their dependencies,
+          # but Homebrew Qt plugins retain an absolute LC_ID_DYLIB.
+          # Normalize plugin identities so the final package contains no
+          # Homebrew paths.
+          while IFS= read -r -d '' plugin; do
+            if file "$plugin" | grep -q "Mach-O"; then
+              install_name_tool \
+                -id "@rpath/$(basename "$plugin")" \
+                "$plugin"
+            fi
+          done < <(find "$APP/Contents/PlugIns" -type f -print0)
+
       - name: Audit architecture runtime libraries
         shell: bash
         run: |
