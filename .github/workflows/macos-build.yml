@@ -428,11 +428,13 @@ jobs:
 
           PACKAGE="New808coin-macOS-universal"
 
-          test_version() {
+          test_command() {
             binary="$1"
+            argument="$2"
+            expected="$3"
             status=0
 
-            if output=$("$binary" --version 2>&1); then
+            if output=$("$binary" "$argument" 2>&1); then
               status=0
             else
               status=$?
@@ -440,21 +442,32 @@ jobs:
 
             echo "$output"
 
-            # Legacy binaries may return 1 after printing their version.
+            # Legacy binaries may return 1 after displaying information.
             if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then
               echo "::error::$binary exited with status $status"
               return "$status"
             fi
 
-            if ! grep -qi "version" <<< "$output"; then
-              echo "::error::$binary did not produce version output"
+            if ! grep -Eqi "$expected" <<< "$output"; then
+              echo "::error::$binary did not produce expected output"
               return 1
             fi
           }
 
-          test_version "$PACKAGE/bin/new808coind"
-          test_version "$PACKAGE/bin/new808coin-cli"
-          test_version "$PACKAGE/bin/new808coin-tx"
+          test_command \
+            "$PACKAGE/bin/new808coind" \
+            "--version" \
+            "version"
+
+          test_command \
+            "$PACKAGE/bin/new808coin-cli" \
+            "--version" \
+            "version"
+
+          test_command \
+            "$PACKAGE/bin/new808coin-tx" \
+            "-?" \
+            "usage|new808coin-tx"
 
       - name: Create final ZIP
         shell: bash
