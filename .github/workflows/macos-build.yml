@@ -179,6 +179,12 @@ jobs:
             -string "15.0" "$PLIST"
           plutil -insert NSHighResolutionCapable \
             -bool true "$PLIST"
+          plutil -insert CFBundleIconFile \
+            -string "New808coin.icns" "$PLIST"
+
+          mkdir -p "$APP/Contents/Resources"
+          cp src/qt/res/icons/bitcoin.icns \
+            "$APP/Contents/Resources/New808coin.icns"
 
           # Bundle non-Qt libraries before macdeployqt rewrites their paths.
           dylibbundler \
