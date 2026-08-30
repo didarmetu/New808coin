@@ -97,7 +97,9 @@ jobs:
         run: |
           ./configure \
             --disable-tests \
-            --with-gui=qt5
+            --with-gui=qt5 \
+            --with-boost="$(brew --prefix boost)" \
+            --with-boost-libdir="$(brew --prefix boost)/lib"
 
       - name: Compile
         run: make -j"$(sysctl -n hw.logicalcpu)"
