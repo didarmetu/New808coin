@@ -180,17 +180,18 @@ jobs:
           plutil -insert NSHighResolutionCapable \
             -bool true "$PLIST"
 
-          "$(brew --prefix qt@5)/bin/macdeployqt" \
-            "$APP" \
-            -always-overwrite \
-            -verbose=2
-
+          # Bundle non-Qt libraries before macdeployqt rewrites their paths.
           dylibbundler \
             -od \
             -b \
             -x "$APP_MACOS/new808coin-qt" \
             -d "$APP_FRAMEWORKS" \
             -p '@executable_path/../Frameworks/'
+
+          "$(brew --prefix qt@5)/bin/macdeployqt" \
+            "$APP" \
+            -always-overwrite \
+            -verbose=2
 
           # Bundle dependencies for all CLI executables in one pass.
           # Using -od separately would erase libraries copied by earlier passes.
@@ -468,6 +469,11 @@ jobs:
             "$PACKAGE/bin/new808coin-tx" \
             "-?" \
             "usage|new808coin-tx"
+
+          test_command \
+            "$PACKAGE/New808coin-Qt.app/Contents/MacOS/new808coin-qt" \
+            "--version" \
+            "version"
 
       - name: Create final ZIP
         shell: bash
