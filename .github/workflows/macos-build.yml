@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Show build environment
         run: |
@@ -48,7 +48,32 @@ jobs:
             qt@5 \
             protobuf@21 \
             qrencode \
-            berkeley-db@4
+
+      - name: Build Berkeley DB 4.8
+        run: |
+          BDB_SOURCE="$RUNNER_TEMP/bdb-source"
+          BDB_PREFIX="$RUNNER_TEMP/bdb48"
+
+          mkdir -p "$BDB_SOURCE" "$BDB_PREFIX"
+          cd "$BDB_SOURCE"
+
+          curl --location --fail             --output db-4.8.30.NC.tar.gz             https://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz
+
+          echo "12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz"             | shasum -a 256 -c -
+
+          tar -xzf db-4.8.30.NC.tar.gz
+          cd db-4.8.30.NC
+
+          sed -i.bak             's/__atomic_compare_exchange/__atomic_compare_exchange_db/g'             dbinc/atomic.h
+
+          sed -i.bak             's/atomic_init/atomic_init_db/g'             dbinc/atomic.h             mp/mp_region.c             mp/mp_mvcc.c             mp/mp_fget.c             mutex/mut_method.c             mutex/mut_tas.c
+
+          cd build_unix
+
+          ../dist/configure             --prefix="$BDB_PREFIX"             --enable-cxx             --disable-shared             --disable-replication
+
+          make -j"$(sysctl -n hw.logicalcpu)"
+          make install
 
       - name: Configure environment
         run: |
@@ -56,7 +81,7 @@ jobs:
           QT_PREFIX="$(brew --prefix qt@5)"
           OPENSSL_PREFIX="$(brew --prefix openssl@3.5)"
           PROTOBUF_PREFIX="$(brew --prefix protobuf@21)"
-          BDB_PREFIX="$(brew --prefix berkeley-db@4)"
+          BDB_PREFIX="$RUNNER_TEMP/bdb48"
 
           echo "$QT_PREFIX/bin" >> "$GITHUB_PATH"
           echo "$PROTOBUF_PREFIX/bin" >> "$GITHUB_PATH"
