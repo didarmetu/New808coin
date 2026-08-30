@@ -14,7 +14,7 @@
 - (NSString *)__bundleIdentifier
 {
     if (self == [NSBundle mainBundle]) {
-        return @"io.savebitcoin.New808coin-Qt";
+        return @"org.new808coin.New808coin-Qt";
     } else {
         return [self __bundleIdentifier];
     }

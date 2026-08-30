@@ -172,9 +172,9 @@ jobs:
           plutil -insert CFBundlePackageType \
             -string "APPL" "$PLIST"
           plutil -insert CFBundleVersion \
-            -string "4.2.4.8" "$PLIST"
+            -string "4.2.6.9" "$PLIST"
           plutil -insert CFBundleShortVersionString \
-            -string "4.2.4.8" "$PLIST"
+            -string "4.2.6.9" "$PLIST"
           plutil -insert LSMinimumSystemVersion \
             -string "15.0" "$PLIST"
           plutil -insert NSHighResolutionCapable \
@@ -491,7 +491,7 @@ jobs:
           set -euo pipefail
 
           PACKAGE="New808coin-macOS-universal"
-          ZIP="New808coin-4.2.4.8-macOS-universal-unsigned.zip"
+          ZIP="New808coin-4.2.6.9-macOS-universal-unsigned.zip"
 
           ditto -c -k \
             --sequesterRsrc \
@@ -507,7 +507,7 @@ jobs:
         with:
           name: new808coin-macOS-universal-unsigned
           path: |
-            New808coin-4.2.4.8-macOS-universal-unsigned.zip
-            New808coin-4.2.4.8-macOS-universal-unsigned.zip.sha256
+            New808coin-4.2.6.9-macOS-universal-unsigned.zip
+            New808coin-4.2.6.9-macOS-universal-unsigned.zip.sha256
             New808coin-macOS-universal/runtime-libraries.txt
           if-no-files-found: error

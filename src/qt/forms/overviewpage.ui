@@ -785,7 +785,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string notr="true">&lt;a href=&quot;https://new808.tk&quot;&gt;https://new808.tk&lt;/a&gt;</string>
+                        <string notr="true">&lt;a href=&quot;https://new808coin.com&quot;&gt;https://new808coin.com&lt;/a&gt;</string>
                        </property>
                        <property name="textFormat">
                         <enum>Qt::RichText</enum>
@@ -875,7 +875,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string notr="true">&lt;a href=&quot;https://explorer.new808.tk/&quot;&gt;https://explorer.new808.tk/&lt;/a&gt;</string>
+                        <string notr="true">&lt;a href=&quot;https://explorer.new808coin.com&quot;&gt;https://explorer.new808coin.com&lt;/a&gt;</string>
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -946,7 +946,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string notr="true">&lt;a href=&quot;https://new808.tk/white-paper&quot;&gt;https://new808.tk/white-paper&lt;/a&gt;</string>
+                        <string notr="true">&lt;a href=&quot;https://new808coin.com/white-paper&quot;&gt;https://new808coin.com/white-paper&lt;/a&gt;</string>
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

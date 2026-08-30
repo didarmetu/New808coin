@@ -51,7 +51,7 @@ static const int MAX_URI_LENGTH = 255;
 #define SPINNER_FRAMES 35
 
 #define QAPP_ORG_NAME "New808coin"
-#define QAPP_ORG_DOMAIN "savebitcoin.io"
+#define QAPP_ORG_DOMAIN "new808coin.com"
 #define QAPP_APP_NAME_DEFAULT "New808coin-Qt"
 #define QAPP_APP_NAME_TESTNET "New808coin-Qt-testnet"
 
