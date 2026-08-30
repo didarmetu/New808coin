@@ -403,16 +403,20 @@ jobs:
           PACKAGE="New808coin-macOS-universal"
           APP="$PACKAGE/New808coin-Qt.app"
 
-          while IFS= read -r -d '' candidate; do
-            if file "$candidate" | grep -q "Mach-O"; then
-              codesign \
-                --force \
-                --sign - \
-                --timestamp=none \
-                "$candidate"
-            fi
-          done < <(find "$PACKAGE" -type f -print0)
+          # Sign standalone command-line binaries.
+          for binary in \
+            "$PACKAGE/bin/new808coind" \
+            "$PACKAGE/bin/new808coin-cli" \
+            "$PACKAGE/bin/new808coin-tx"
+          do
+            codesign \
+              --force \
+              --sign - \
+              --timestamp=none \
+              "$binary"
+          done
 
+          # Sign nested frameworks and plugins with the application.
           codesign \
             --force \
             --deep \
@@ -420,7 +424,7 @@ jobs:
             --timestamp=none \
             "$APP"
 
-          codesign --verify --deep --strict "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
 
       - name: Test command-line binaries
         shell: bash
