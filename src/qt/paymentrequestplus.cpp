@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <openssl/x509.h>
+#include <openssl/opensslv.h>
 #include <openssl/x509_vfy.h>
 
 #include <QDateTime>
@@ -156,7 +157,11 @@ bool PaymentRequestPlus::getMerchant(X509_STORE* certStore, QString& merchant) c
         std::string data_to_verify; // Everything but the signature
         rcopy.SerializeToString(&data_to_verify);
 
+        #if OPENSSL_VERSION_NUMBER < 0x10100000L
+        ctx = EVP_MD_CTX_create();
+#else
         ctx = EVP_MD_CTX_new();
+#endif
         pubkey = X509_get_pubkey(signing_cert);
         if (ctx == NULL || pubkey == NULL ||
             !EVP_VerifyInit_ex(ctx, digestAlgorithm, NULL) ||
@@ -181,7 +186,11 @@ bool PaymentRequestPlus::getMerchant(X509_STORE* certStore, QString& merchant) c
 
     if (website)
         delete[] website;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    EVP_MD_CTX_destroy(ctx);
+#else
     EVP_MD_CTX_free(ctx);
+#endif
     EVP_PKEY_free(pubkey);
     X509_STORE_CTX_free(store_ctx);
     for (unsigned int i = 0; i < certs.size(); i++)

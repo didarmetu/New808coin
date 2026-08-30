@@ -1,6 +1,7 @@
 DIST_SUBDIRS = secp256k1 univalue
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS)
 
+
 if EMBEDDED_UNIVALUE
 LIBUNIVALUE = univalue/libunivalue.la
 
@@ -359,6 +360,7 @@ nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 
 # bitcoind binary #
 new808coind_LDADD = \
+  $(LD_START_GROUP) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBUNIVALUE) \
@@ -375,6 +377,9 @@ endif
 if ENABLE_WALLET
 new808coind_LDADD += libbitcoin_wallet.a
 endif
+
+new808coind_LDADD += $(LD_END_GROUP)
+
 new808coind_SOURCES = new808coind.cpp
 #
 

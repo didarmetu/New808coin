@@ -15,6 +15,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/version.hpp>
 
 #include <univalue.h>
 
@@ -111,7 +112,11 @@ public:
     bool connect(const std::string& server, const std::string& port)
     {
         using namespace boost::asio::ip;
+#if BOOST_VERSION >= 106600
         tcp::resolver resolver(stream.get_executor());
+#else
+        tcp::resolver resolver(stream.get_io_service());
+#endif
         tcp::resolver::iterator endpoint_iterator;
 #if BOOST_VERSION >= 104300
         try {

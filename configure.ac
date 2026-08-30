@@ -6,6 +6,11 @@ define(_CLIENT_VERSION_REVISION, 4)
 define(_CLIENT_VERSION_BUILD, 8)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2024)
+LD_START_GROUP="-Wl,--start-group"
+LD_END_GROUP="-Wl,--end-group"
+AC_SUBST([LD_START_GROUP])
+AC_SUBST([LD_END_GROUP])
+
 AC_INIT([New808coin Core],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[www.savebitcoin.io],[new808coin])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config/new808coin-config.h])
