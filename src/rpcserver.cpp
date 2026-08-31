@@ -608,7 +608,13 @@ static ip::tcp::endpoint ParseEndpoint(const std::string& strEndpoint, int defau
     std::string addr;
     int port = defaultPort;
     SplitHostPort(strEndpoint, port, addr);
-    return ip::tcp::endpoint(asio::ip::make_address(addr), port);
+#if BOOST_VERSION >= 106600
+    return ip::tcp::endpoint(
+        asio::ip::make_address(addr), port);
+#else
+    return ip::tcp::endpoint(
+        asio::ip::address::from_string(addr), port);
+#endif
 }
 
 void StartRPCThreads()
@@ -726,7 +732,13 @@ void StartRPCThreads()
                 v6_only_error);
 
             acceptor->bind(endpoint);
-            acceptor->listen(socket_base::max_listen_connections);
+#if BOOST_VERSION >= 106600
+            acceptor->listen(
+                socket_base::max_listen_connections);
+#else
+            acceptor->listen(
+                socket_base::max_connections);
+#endif
 
             RPCListen(acceptor, *rpc_ssl_context, fUseSSL);
 
