@@ -26,6 +26,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include <boost/version.hpp>
 
 #include <chrono>
 
@@ -43,9 +44,15 @@ static std::string rpcWarmupStatus("RPC server started");
 static CCriticalSection cs_rpcWarmup;
 
 //! These are created by StartRPCThreads, destroyed in StopRPCThreads
+#if BOOST_VERSION >= 106600
 typedef asio::io_context RPCIOContext;
 typedef asio::steady_timer RPCTimer;
 typedef asio::executor_work_guard<RPCIOContext::executor_type> RPCWorkGuard;
+#else
+typedef asio::io_service RPCIOContext;
+typedef asio::deadline_timer RPCTimer;
+typedef asio::io_service::work RPCWorkGuard;
+#endif
 
 static RPCIOContext* rpc_io_service = NULL;
 static map<string, boost::shared_ptr<RPCTimer> > deadlineTimers;
@@ -753,7 +760,12 @@ void StartDummyRPCThread()
         rpc_io_service = new RPCIOContext();
         /* Create dummy "work" to keep the thread from exiting when no timeouts active,
          * see http://www.boost.org/doc/libs/1_51_0/doc/html/boost_asio/reference/io_service.html#boost_asio.reference.io_service.stopping_the_io_service_from_running_out_of_work */
-        rpc_dummy_work = new RPCWorkGuard(asio::make_work_guard(*rpc_io_service));
+#if BOOST_VERSION >= 106600
+        rpc_dummy_work = new RPCWorkGuard(
+            asio::make_work_guard(*rpc_io_service));
+#else
+        rpc_dummy_work = new RPCWorkGuard(*rpc_io_service);
+#endif
         rpc_worker_group = new boost::thread_group();
         rpc_worker_group->create_thread(boost::bind(static_cast<std::size_t (RPCIOContext::*)()>(&RPCIOContext::run), rpc_io_service));
         fRPCRunning = true;
@@ -841,7 +853,13 @@ void RPCRunLater(const std::string& name, boost::function<void(void)> func, int6
         deadlineTimers.insert(make_pair(name,
             boost::shared_ptr<RPCTimer>(new RPCTimer(*rpc_io_service))));
     }
-    deadlineTimers[name]->expires_after(std::chrono::seconds(nSeconds));
+#if BOOST_VERSION >= 106600
+    deadlineTimers[name]->expires_after(
+        std::chrono::seconds(nSeconds));
+#else
+    deadlineTimers[name]->expires_from_now(
+        boost::posix_time::seconds(nSeconds));
+#endif
     deadlineTimers[name]->async_wait(boost::bind(RPCRunHandler, _1, func));
 }
 
