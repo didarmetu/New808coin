@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/windows-build.yml"
       - "src/rpcserver.cpp"
+      - "src/new808coin-cli.cpp"
 
 jobs:
   build:
