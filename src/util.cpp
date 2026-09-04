@@ -494,23 +494,137 @@ boost::filesystem::path GetMasternodeConfigFile()
     return pathConfigFile;
 }
 
+static const char* DEFAULT_CONFIG =
+R"(# ============================================================
+# New808coin Normal Desktop / Laptop Wallet
+# ============================================================
+
+# ------------------------------------------------------------
+# GENERAL NODE SETTINGS
+# ------------------------------------------------------------
+
+listen=1
+logtimestamps=1
+maxconnections=125
+
+# ------------------------------------------------------------
+# KNOWN NEW808COIN PEERS
+# ------------------------------------------------------------
+
+addnode=38.242.142.211:33808
+addnode=207.180.217.38:33808
+addnode=89.116.28.74:33808
+addnode=137.184.98.124:33808
+addnode=165.22.11.236:33808
+addnode=193.176.79.83:33808
+addnode=38.109.228.194:33808
+addnode=144.24.52.110:33808
+addnode=161.97.124.118:33808
+addnode=186.190.215.46:33808
+
+# ------------------------------------------------------------
+# MASTERNODE / SERVER SETTINGS
+# Normal desktop wallets do not need these.
+# Uncomment only when configuring a masternode/server.
+# ------------------------------------------------------------
+
+# Run as background daemon on a VPS.
+#daemon=1
+
+# Enable RPC server.
+#server=1
+
+# Full transaction index.
+# Recommended for masternodes/server nodes.
+# Normal desktop wallets usually do not need this.
+#txindex=1
+
+# Enable masternode mode.
+#masternode=1
+
+# Public IP address of this masternode VPS.
+#externalip=YOUR_MASTERNODE_IP:33808
+
+# Masternode private key.
+# Do not use a wallet/private spending key here.
+#masternodeprivkey=YOUR_MASTERNODE_PRIVATE_KEY
+
+# ------------------------------------------------------------
+# RPC SETTINGS
+# Normal desktop wallets usually do not need these.
+# ------------------------------------------------------------
+
+#rpcuser=New808coinRPC
+#rpcpassword=YOUR_STRONG_RPC_PASSWORD
+#rpcport=8089
+#rpcbind=127.0.0.1
+#rpcallowip=127.0.0.1
+
+# ------------------------------------------------------------
+# OPTIONAL SETTINGS
+# ------------------------------------------------------------
+
+# Old Berkeley DB wallet shutdown option.
+# Usually not required.
+#detachdb=1
+
+# Enable only while troubleshooting.
+#debug=1
+
+# Network debugging only.
+#debug=net
+)";
+
+static void CreateDefaultConfigFileIfNeeded(
+    const boost::filesystem::path& pathConfigFile)
+{
+    bool fCreateDefault = !boost::filesystem::exists(pathConfigFile);
+
+    if (!fCreateDefault) {
+        try {
+            fCreateDefault =
+                boost::filesystem::is_regular_file(pathConfigFile) &&
+                boost::filesystem::file_size(pathConfigFile) == 0;
+        } catch (const boost::filesystem::filesystem_error&) {
+            return;
+        }
+    }
+
+    if (!fCreateDefault)
+        return;
+
+    FILE* configFile =
+        fopen(pathConfigFile.string().c_str(), "w");
+
+    if (configFile == NULL)
+        return;
+
+    const int result = fputs(DEFAULT_CONFIG, configFile);
+    fclose(configFile);
+
+    if (result >= 0) {
+        LogPrintf(
+            "Created default configuration file %s\n",
+            pathConfigFile.string());
+    }
+}
+
 void ReadConfigFile(map<string, string>& mapSettingsRet,
     map<string, vector<string> >& mapMultiSettingsRet)
 {
-    boost::filesystem::ifstream streamConfig(GetConfigFile());
-    if (!streamConfig.good()) {
-        // Create empty new808coin.conf if it does not exist
-        FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
-        if (configFile != NULL)
-            fclose(configFile);
-        return; // Nothing to read, so just return
-    }
+    const boost::filesystem::path pathConfigFile = GetConfigFile();
+
+    CreateDefaultConfigFileIfNeeded(pathConfigFile);
+
+    boost::filesystem::ifstream streamConfig(pathConfigFile);
+    if (!streamConfig.good())
+        return;
 
     set<string> setOptions;
     setOptions.insert("*");
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it) {
-        // Don't overwrite existing settings so command line settings override new808coin.conf
+        // Command-line settings take precedence over configuration-file settings.
         string strKey = string("-") + it->string_key;
         string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
@@ -518,7 +632,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
             mapSettingsRet[strKey] = strValue;
         mapMultiSettingsRet[strKey].push_back(strValue);
     }
-    // If datadir is changed in .conf file:
+
     ClearDatadirCache();
 }
 

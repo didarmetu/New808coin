@@ -1618,7 +1618,7 @@ double ConvertBitsToDouble(unsigned int nBits)
     return dDiff;
 }
 
-int64_t GetBlockValue(int nHeight)
+int64_t GetBlockValue(int nHeight, CAmount nMoneySupply)
 {
     int64_t nSubsidy = 0;
 
@@ -1631,87 +1631,141 @@ int64_t GetBlockValue(int nHeight)
         nSubsidy = 2100000 * COIN;
     else if (nHeight < Params().LAST_POW_BLOCK())
         nSubsidy = 808 * COIN;
+
+    // Phase 1
     else if (nHeight <= 42000) {
-        if ( nHeight % 808 == 807 )
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 42 * COIN;
     }
-    else if (nHeight > 30000 && nHeight <= 100000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 2
+    else if (nHeight <= 100000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 40 * COIN;
     }
-    else if (nHeight > 100000 && nHeight <= 130000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 3
+    else if (nHeight <= 130000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 33 * COIN;
-    }   // changed for mandatory update v4.0.0.0
-    else if (nHeight > 130000 && nHeight <= 140000){
-        if ( nHeight % 808 == 807 )
+    }
+
+    // Phase 4 - mandatory update v4.0.0.0
+    else if (nHeight <= 140000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 4 * COIN;
-    }   // changed for mandatory update v4.1.0.0
-    else if (nHeight > 140000 && nHeight <= 155000){
-        if ( nHeight % 808 == 807 )
+    }
+
+    // Phase 5 - mandatory update v4.1.0.0
+    else if (nHeight <= 155000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 8 * COIN;
     }
-    else if (nHeight > 155000 && nHeight <= 400000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 6
+    else if (nHeight <= 400000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 16 * COIN;
     }
-    else if (nHeight > 400000 && nHeight <= 500000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 7 - mandatory update v4.2.0.0
+    else if (nHeight <= 500000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 32 * COIN;
-    }  // changed for mandatory update v4.2.0.0
-    else if (nHeight > 500000 && nHeight <= 525000){
-        if ( nHeight % 808 == 807 )
+    }
+
+    // Phase 8
+    else if (nHeight <= 525000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 64 * COIN;
     }
-    else if (nHeight > 525000 && nHeight <= 550000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 9
+    else if (nHeight <= 550000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 16 * COIN;
     }
-    else if (nHeight > 550000 && nHeight <= 575000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 10
+    else if (nHeight <= 575000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 8 * COIN;
     }
-    else if (nHeight > 575000 && nHeight <= 600000){
-        if ( nHeight % 808 == 807 )
+
+    // Phase 11
+    else if (nHeight <= 600000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 4 * COIN;
     }
-    else {
-        if ( nHeight % 808 == 807 )
+
+    // Phase 12: 600,001 - 1,000,000
+    // Existing 808 N808 superblock behavior remains active.
+    else if (nHeight <= 1000000) {
+        if (nHeight % 808 == 807)
             nSubsidy = 808 * COIN;
         else
             nSubsidy = 2 * COIN;
     }
 
-    // Check if we reached the coin max supply.
-    int64_t nMoneySupply = chainActive.Tip()->nMoneySupply;
+    // New reward system: block 1,000,001+
+    //
+    // - Superblocks are permanently disabled.
+    // - 1.00000000 N808 from 1,000,001 - 1,100,000.
+    // - Reward halves every 100,000 blocks.
+    // - Final scheduled reward is 0.00000020 N808 until Max Supply is reached.
+    else {
+        const int64_t MIN_REWARD = 20; // 0.00000020 N808
 
-    if (nMoneySupply + nSubsidy >= Params().MaxMoneyOut())
-        nSubsidy = Params().MaxMoneyOut() - nMoneySupply;
+        int halvings = (nHeight - 1000001) / 100000;
 
+        nSubsidy = COIN;
+
+        for (int i = 0; i < halvings; ++i) {
+            if (nSubsidy <= MIN_REWARD) {
+                nSubsidy = MIN_REWARD;
+                break;
+            }
+
+            nSubsidy /= 2;
+
+            if (nSubsidy < MIN_REWARD) {
+                nSubsidy = MIN_REWARD;
+                break;
+            }
+        }
+    }
+
+    // Enforce the maximum supply using the exact previous block supply.
     if (nMoneySupply >= Params().MaxMoneyOut())
-        nSubsidy = 0;
+        return 0;
+
+    const CAmount nRemainingSupply =
+        Params().MaxMoneyOut() - nMoneySupply;
+
+    if (nSubsidy > nRemainingSupply)
+        nSubsidy = nRemainingSupply;
 
     return nSubsidy;
 }
@@ -1719,16 +1773,41 @@ int64_t GetBlockValue(int nHeight)
 int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCount)
 {
     int64_t ret = 0;
-    if (nHeight < Params().LAST_POW_BLOCK() || blockValue == 0) { ret = blockValue * 0;
-    } else if (nHeight > Params().LAST_POW_BLOCK() && nHeight <= 140000)     { ret = blockValue * 0.85;
-    } else if (nHeight > 140000 && nHeight <= 155000)  { ret = blockValue * 0.86;
-    } else if (nHeight > 155000 && nHeight <= 400000) { ret = blockValue * 0.87;
-    } else if (nHeight > 400000 && nHeight <= 500000) { ret = blockValue * 0.88;
-    } else if (nHeight > 500000 && nHeight <= 525000) { ret = blockValue * 0.89;
-    } else if (nHeight > 525000 && nHeight <= 550000) { ret = blockValue * 0.87;
-    } else if (nHeight > 550000 && nHeight <= 575000) { ret = blockValue * 0.86;
-    } else if (nHeight > 575000 && nHeight <= 600000) { ret = blockValue * 0.85;
-    } else if (nHeight > 600000) { ret = blockValue * 0.85; }
+
+    if (nHeight < Params().LAST_POW_BLOCK() || blockValue == 0) {
+        ret = blockValue * 0;
+    }
+    else if (nHeight > Params().LAST_POW_BLOCK() && nHeight <= 140000) {
+        ret = blockValue * 0.85;
+    }
+    else if (nHeight > 140000 && nHeight <= 155000) {
+        ret = blockValue * 0.86;
+    }
+    else if (nHeight > 155000 && nHeight <= 400000) {
+        ret = blockValue * 0.87;
+    }
+    else if (nHeight > 400000 && nHeight <= 500000) {
+        ret = blockValue * 0.88;
+    }
+    else if (nHeight > 500000 && nHeight <= 525000) {
+        ret = blockValue * 0.89;
+    }
+    else if (nHeight > 525000 && nHeight <= 550000) {
+        ret = blockValue * 0.87;
+    }
+    else if (nHeight > 550000 && nHeight <= 575000) {
+        ret = blockValue * 0.86;
+    }
+    else if (nHeight > 575000 && nHeight <= 1000000) {
+        // Preserve existing historical calculation.
+        ret = blockValue * 0.85;
+    }
+    else if (nHeight >= 1000001) {
+        // New consensus rule.
+        // Deterministic integer calculation: 85%.
+        ret = blockValue * 85 / 100;
+    }
+
     return ret;
 }
 
@@ -1833,10 +1912,21 @@ void Misbehaving(NodeId pnode, int howmuch)
     state->nMisbehavior += howmuch;
     int banscore = GetArg("-banscore", 100);
     if (state->nMisbehavior >= banscore && state->nMisbehavior - howmuch < banscore) {
-        //LogPrintf("Misbehaving: %s (%d -> %d) BAN THRESHOLD EXCEEDED\n", state->name, state->nMisbehavior - howmuch, state->nMisbehavior);
-        //state->fShouldBan = true;
-    } else
-        LogPrintf("Misbehaving: %s (%d -> %d)\n", state->name, state->nMisbehavior - howmuch, state->nMisbehavior);
+        LogPrintf(
+            "Misbehaving: %s (%d -> %d) BAN THRESHOLD EXCEEDED\n",
+            state->name,
+            state->nMisbehavior - howmuch,
+            state->nMisbehavior
+        );
+        state->fShouldBan = true;
+    } else {
+        LogPrintf(
+            "Misbehaving: %s (%d -> %d)\n",
+            state->name,
+            state->nMisbehavior - howmuch,
+            state->nMisbehavior
+        );
+    }
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
@@ -2269,7 +2359,15 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime1 - nTimeStart), 0.001 * (nTime1 - nTimeStart) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime1 - nTimeStart) / (nInputs - 1), nTimeConnect * 0.000001);
 
     //PoW phase redistributed fees to miner. PoS stage destroys fees.
-    CAmount nExpectedMint = GetBlockValue(pindex->pprev->nHeight);
+    int nRewardHeight;
+
+    if (pindex->nHeight >= 1000001)
+        nRewardHeight = pindex->nHeight;
+    else
+        nRewardHeight = pindex->pprev ? pindex->pprev->nHeight : 0;
+
+    CAmount nExpectedMint =
+        GetBlockValue(nRewardHeight, nMoneySupplyPrev);
     if (block.IsProofOfWork())
         nExpectedMint += nFees;
 
@@ -3145,6 +3243,23 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     return true;
 }
 
+CBlockIndex* GetBlockPrevIndex(const CBlock& block)
+{
+    CBlockIndex* pindexTip = chainActive.Tip();
+
+    if (pindexTip != NULL &&
+        pindexTip->GetBlockHash() == block.hashPrevBlock) {
+        return pindexTip;
+    }
+
+    BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+
+    if (mi != mapBlockIndex.end())
+        return mi->second;
+
+    return NULL;
+}
+
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig)
 {
     // These are checks that are independent of context.
@@ -3231,16 +3346,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     }
 
     // masternode payments / budgets
-    CBlockIndex* pindexPrev = chainActive.Tip();
+    CBlockIndex* pindexPrev = GetBlockPrevIndex(block);
+
     int nHeight = 0;
+
     if (pindexPrev != NULL) {
-        if (pindexPrev->GetBlockHash() == block.hashPrevBlock) {
-            nHeight = pindexPrev->nHeight + 1;
-        } else { //out of order
-            BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
-            if (mi != mapBlockIndex.end() && (*mi).second)
-                nHeight = (*mi).second->nHeight + 1;
-        }
+        nHeight = pindexPrev->nHeight + 1;
 
         // N808
         // It is entierly possible that we don't have enough data and this could fail
@@ -3249,7 +3360,10 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
         // The case also exists that the sending peer could not have enough data to see
         // that this block is invalid, so don't issue an outright ban.
         if (nHeight != 0 && !IsInitialBlockDownload()) {
-            if (!IsBlockPayeeValid(block, nHeight)) {
+            if (!IsBlockPayeeValid(
+                    block,
+                    nHeight,
+                    pindexPrev->nMoneySupply)) {
                 mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
                 return state.DoS(0, error("CheckBlock() : Couldn't find masternode/budget payment"),
                         REJECT_INVALID, "bad-cb-payee");
@@ -3886,76 +4000,12 @@ bool static LoadBlockIndexDB(string& strError)
         }
     }
 
-    //Check if the shutdown procedure was followed on last client exit
+    // Detect an interrupted previous shutdown. Recovery is performed only
+    // after chainActive is restored to the persisted chainstate tip.
     bool fLastShutdownWasPrepared = true;
     pblocktree->ReadFlag("shutdown", fLastShutdownWasPrepared);
-    LogPrintf("%s: Last shutdown was prepared: %s\n", __func__, fLastShutdownWasPrepared);
-
-    //Check for inconsistency with block file info and internal state
-    if (!fLastShutdownWasPrepared && !GetBoolArg("-forcestart", false) && !GetBoolArg("-reindex", false)) {
-        unsigned int nHeightLastBlockFile = vinfoBlockFile[nLastBlockFile].nHeightLast + 1;
-        if (vSortedByHeight.size() > nHeightLastBlockFile && pcoinsTip->GetBestBlock() != vSortedByHeight[nHeightLastBlockFile].second->GetBlockHash()) {
-            //The database is in a state where a block has been accepted and written to disk, but the
-            //transaction database (pcoinsTip) was not flushed to disk, and is therefore not in sync with
-            //the block index database.
-
-            if (!mapBlockIndex.count(pcoinsTip->GetBestBlock())) {
-                strError = "The wallet has been not been closed gracefully, causing the transaction database to be out of sync with the block database";
-                return false;
-            }
-            LogPrintf("%s : pcoinstip synced to block height %d, block index height %d\n", __func__,
-                      mapBlockIndex[pcoinsTip->GetBestBlock()]->nHeight, vSortedByHeight.size());
-
-            //get the index associated with the point in the chain that pcoinsTip is synced to
-            CBlockIndex *pindexLastMeta = vSortedByHeight[vinfoBlockFile[nLastBlockFile].nHeightLast + 1].second;
-            CBlockIndex *pindex = vSortedByHeight[0].second;
-            unsigned int nSortedPos = 0;
-            for (unsigned int i = 0; i < vSortedByHeight.size(); i++) {
-                nSortedPos = i;
-                if (vSortedByHeight[i].first == mapBlockIndex[pcoinsTip->GetBestBlock()]->nHeight + 1) {
-                    pindex = vSortedByHeight[i].second;
-                    break;
-                }
-            }
-
-            // Start at the last block that was successfully added to the txdb (pcoinsTip) and manually add all transactions that occurred for each block up until
-            // the best known block from the block index db.
-            CCoinsViewCache view(pcoinsTip);
-            while (nSortedPos < vSortedByHeight.size()) {
-                CBlock block;
-                if (!ReadBlockFromDisk(block, pindex)) {
-                    strError = "The wallet has been not been closed gracefully and has caused corruption of blocks stored to disk. Data directory is in an unusable state";
-                    return false;
-                }
-
-                vector<CTxUndo> vtxundo;
-                vtxundo.reserve(block.vtx.size() - 1);
-                uint256 hashBlock = block.GetHash();
-                for (unsigned int i = 0; i < block.vtx.size(); i++) {
-                    CValidationState state;
-                    CTxUndo undoDummy;
-                    if (i > 0)
-                        vtxundo.push_back(CTxUndo());
-                    UpdateCoins(block.vtx[i], state, view, i == 0 ? undoDummy : vtxundo.back(), pindex->nHeight);
-                    view.SetBestBlock(hashBlock);
-                }
-
-                if(pindex->nHeight >= pindexLastMeta->nHeight)
-                    break;
-
-                pindex = vSortedByHeight[++nSortedPos].second;
-            }
-
-            // Save the updates to disk
-            if (!view.Flush() || !pcoinsTip->Flush())
-                LogPrintf("%s : failed to flush view\n", __func__);
-
-            LogPrintf("%s: Last block properly recorded: #%d %s\n", __func__, pindexLastMeta->nHeight,
-                      pindexLastMeta->GetBlockHash().ToString().c_str());
-            LogPrintf("%s : pcoinstip=%d %s\n", __func__, mapBlockIndex[pcoinsTip->GetBestBlock()]->nHeight,
-                      pcoinsTip->GetBestBlock().GetHex());
-        }
-    }
+    LogPrintf("%s: Last shutdown was prepared: %s\n",
+              __func__, fLastShutdownWasPrepared);
 
     // Check whether we need to continue reindexing
     bool fReindexing = false;
@@ -3976,6 +4026,37 @@ bool static LoadBlockIndexDB(string& strError)
     chainActive.SetTip(it->second);
 
     PruneBlockIndexCandidates();
+
+    if (!fLastShutdownWasPrepared &&
+        !GetBoolArg("-forcestart", false) &&
+        !GetBoolArg("-reindex", false)) {
+        LogPrintf(
+            "%s: Recovering after unclean shutdown from persisted "
+            "chainstate height %d\n",
+            __func__,
+            chainActive.Height());
+
+        CValidationState recoveryState;
+
+        if (!ActivateBestChain(recoveryState)) {
+            strError =
+                "Previous shutdown was not clean and automatic block "
+                "database recovery failed";
+            return false;
+        }
+
+        if (!FlushStateToDisk(recoveryState, FLUSH_STATE_ALWAYS)) {
+            strError =
+                "Previous shutdown was not clean and recovered database "
+                "state could not be flushed";
+            return false;
+        }
+
+        LogPrintf(
+            "%s: Unclean shutdown recovery completed at height %d\n",
+            __func__,
+            chainActive.Height());
+    }
 
     LogPrintf("LoadBlockIndexDB(): hashBestChain=%s height=%d date=%s progress=%f\n",
         chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(),

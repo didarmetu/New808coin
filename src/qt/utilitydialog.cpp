@@ -22,7 +22,6 @@
 
 #include <QCloseEvent>
 #include <QLabel>
-#include <QRegExp>
 #include <QTextTable>
 #include <QTextCursor>
 #include <QVBoxLayout>
@@ -47,21 +46,69 @@ HelpMessageDialog::HelpMessageDialog(QWidget* parent, bool about) : QDialog(pare
     if (about) {
         setWindowTitle(tr("About New808coin Core"));
 
-        /// HTML-format the license message from the core
-        QString licenseInfo = QString::fromStdString(LicenseInfo());
-        QString licenseInfoHTML = licenseInfo;
+        const QString copyrightText =
+            QChar(0xA9) + QString(" 2017-%1 ").arg(COPYRIGHT_YEAR) +
+            tr("The New808coin Core Developers");
 
-        // Make URLs clickable
-        QRegExp uri("<(.*)>", Qt::CaseSensitive, QRegExp::RegExp2);
-        uri.setMinimal(true); // use non-greedy matching
-        licenseInfoHTML.replace(uri, "<a href=\"\\1\">\\1</a>");
-        // Replace newlines with HTML breaks
-        licenseInfoHTML.replace("\n\n", "<br><br>");
+        const QString generalHeading =
+            tr("General Information");
+
+        const QString generalText =
+            tr("New808coin is a decentralized digital currency network powered by "
+               "staking and masternodes. New808coin Core provides the full-node wallet, "
+               "blockchain validation and network services.");
+
+        const QString releaseHeading =
+            tr("What's new in v5.2.6.10");
+
+        const QString releaseText =
+            tr("&bull; New reward schedule activates at block 1,000,001<br>"
+               "&bull; Maximum supply capped at 21,000,000 N808<br>"
+               "&bull; Rewards: 85% masternodes / 15% PoS<br>"
+               "&bull; Halving every 100,000 blocks with a 0.00000020 N808 floor<br>"
+               "&bull; Protocol 70966 plus network, security and Qt improvements");
+
+        const QString upstreamText =
+            tr("Based on Bitcoin Core, Dash Core and PIVX Core.");
+
+        const QString licenseText =
+            tr("New808coin Core is open-source software released under the MIT License.");
+
+        const QString noticesText =
+            tr("See COPYING for full license and third-party notices.");
+
+        text =
+            version + "\n\n" +
+            copyrightText + "\n\n" +
+            generalHeading + "\n\n" +
+            tr("New808coin is a decentralized digital currency network powered by "
+               "staking and masternodes. New808coin Core provides the full-node wallet, "
+               "blockchain validation and network services.") + "\n\n" +
+            releaseHeading + "\n\n" +
+            tr("- New reward schedule activates at block 1,000,001\n"
+               "- Maximum supply capped at 21,000,000 N808\n"
+               "- Rewards: 85% masternodes / 15% PoS\n"
+               "- Halving every 100,000 blocks with a 0.00000020 N808 floor\n"
+               "- Protocol 70966 plus network, security and Qt improvements") +
+            "\n\n" +
+            upstreamText + "\n\n" +
+            licenseText + "\n\n" +
+            noticesText;
+
+        const QString aboutHtml =
+            version.toHtmlEscaped() + "<br><br>" +
+            copyrightText.toHtmlEscaped() + "<br><br>" +
+            "<b>" + generalHeading.toHtmlEscaped() + "</b><br><br>" +
+            generalText + "<br><br>" +
+            "<b>" + releaseHeading.toHtmlEscaped() + "</b><br><br>" +
+            releaseText + "<br><br>" +
+            upstreamText.toHtmlEscaped() + "<br><br>" +
+            licenseText.toHtmlEscaped() + "<br><br>" +
+            noticesText.toHtmlEscaped();
 
         ui->aboutMessage->setTextFormat(Qt::RichText);
         ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        text = version + "\n" + licenseInfo;
-        ui->aboutMessage->setText(version + "<br><br>" + licenseInfoHTML);
+        ui->aboutMessage->setText(aboutHtml);
         ui->aboutMessage->setWordWrap(true);
         ui->helpMessage->setVisible(false);
     } else {

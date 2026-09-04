@@ -517,7 +517,13 @@ void CBudgetManager::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees, b
         ++it;
     }
 
-    CAmount blockValue = GetBlockValue(pindexPrev->nHeight);
+    int nRewardHeight = pindexPrev->nHeight;
+
+    if (pindexPrev->nHeight >= 1000000)
+        nRewardHeight = pindexPrev->nHeight + 1;
+
+    CAmount blockValue =
+        GetBlockValue(nRewardHeight, pindexPrev->nMoneySupply);
 
     if (fProofOfStake) {
         if (nHighestCount > 0) {
@@ -595,6 +601,9 @@ CBudgetProposal* CBudgetManager::FindProposal(uint256 nHash)
 
 bool CBudgetManager::IsBudgetPaymentBlock(int nBlockHeight)
 {
+    if (nBlockHeight >= 1000001)
+        return false;
+
     int nHighestCount = -1;
     int nFivePercent = mnodeman.CountEnabled(ActiveProtocol()) / 20;
 

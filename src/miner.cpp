@@ -118,7 +118,14 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
     txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 
     CBlockIndex* prev = chainActive.Tip();
-    txNew.vout[0].nValue = GetBlockValue(prev->nHeight);
+
+    int nRewardHeight = prev->nHeight;
+
+    if (prev->nHeight >= 1000000)
+        nRewardHeight = prev->nHeight + 1;
+
+    txNew.vout[0].nValue =
+        GetBlockValue(nRewardHeight, prev->nMoneySupply);
 
     pblock->vtx.push_back(txNew);
     pblocktemplate->vTxFees.push_back(-1);   // updated at end

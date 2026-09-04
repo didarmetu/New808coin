@@ -236,7 +236,7 @@ int64_t GetMasternodePayment(int nHeight, int64_t blockValue, int nMasternodeCou
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, bool fProofOfStake);
 
 bool ActivateBestChain(CValidationState& state, CBlock* pblock = NULL, bool fAlreadyChecked = false);
-CAmount GetBlockValue(int nHeight);
+CAmount GetBlockValue(int nHeight, CAmount nMoneySupply);
 
 /** Create a new block index entry for a given block hash */
 CBlockIndex* InsertBlockIndex(uint256 hash);
@@ -440,6 +440,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW = true);
+CBlockIndex* GetBlockPrevIndex(const CBlock& block);
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fCheckSig = true);
 bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev);
 

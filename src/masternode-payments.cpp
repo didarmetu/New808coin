@@ -222,7 +222,11 @@ bool IsBlockValueValid(const CBlock& block, CAmount nExpectedValue, CAmount nMin
     return true;
 }
 
-bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight)
+bool IsBlockPayeeValid(
+    const CBlock& block,
+    int nBlockHeight,
+    CAmount nMoneySupplyPrev
+)
 {
     if (!masternodeSync.IsSynced()) { //there is no budget data to use to check anything -- find the longest chain
         LogPrint("mnpayments", "Client not synced, skipping block payee checks\n");
@@ -247,7 +251,10 @@ bool IsBlockPayeeValid(const CBlock& block, int nBlockHeight)
     }
 
     //check for masternode payee
-    if (masternodePayments.IsTransactionValid(txNew, nBlockHeight))
+    if (masternodePayments.IsTransactionValid(
+            txNew,
+            nBlockHeight,
+            nMoneySupplyPrev))
         return true;
     LogPrint("masternode","Invalid mn payment detected %s\n", txNew.ToString().c_str());
 
@@ -300,8 +307,15 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
         }
     }
 
-    CAmount blockValue = GetBlockValue(pindexPrev->nHeight);
-    CAmount masternodePayment = GetMasternodePayment(pindexPrev->nHeight, blockValue);
+    int nPaymentHeight = pindexPrev->nHeight;
+
+    if (pindexPrev->nHeight >= 1000000)
+        nPaymentHeight = pindexPrev->nHeight + 1;
+
+    CAmount blockValue =
+        GetBlockValue(nPaymentHeight, pindexPrev->nMoneySupply);
+    CAmount masternodePayment =
+        GetMasternodePayment(nPaymentHeight, blockValue);
 
     if (hasPayment) {
         if (fProofOfStake) {
@@ -511,7 +525,10 @@ bool CMasternodePayments::AddWinningMasternode(CMasternodePaymentWinner& winnerI
     return true;
 }
 
-bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
+bool CMasternodeBlockPayees::IsTransactionValid(
+    const CTransaction& txNew,
+    CAmount nMoneySupplyPrev
+)
 {
     LOCK(cs_vecPayments);
 
@@ -520,7 +537,8 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew)
 
     std::string strPayeesPossible = "";
 
-    CAmount nReward = GetBlockValue(nBlockHeight);
+    CAmount nReward =
+        GetBlockValue(nBlockHeight, nMoneySupplyPrev);
 
     if (IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
         // Get a stable number of masternodes by ignoring newly activated (< 8000 sec old) masternodes
@@ -605,12 +623,19 @@ std::string CMasternodePayments::GetRequiredPaymentsString(int nBlockHeight)
     return "Unknown";
 }
 
-bool CMasternodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight)
+bool CMasternodePayments::IsTransactionValid(
+    const CTransaction& txNew,
+    int nBlockHeight,
+    CAmount nMoneySupplyPrev
+)
 {
     LOCK(cs_mapMasternodeBlocks);
 
     if (mapMasternodeBlocks.count(nBlockHeight)) {
-        return mapMasternodeBlocks[nBlockHeight].IsTransactionValid(txNew);
+        return mapMasternodeBlocks[nBlockHeight].IsTransactionValid(
+            txNew,
+            nMoneySupplyPrev
+        );
     }
 
     return true;

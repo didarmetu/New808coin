@@ -216,35 +216,151 @@ bool CECKey::SetPubKey(const unsigned char* pubkey, size_t size)
     return o2i_ECPublicKey(&pkey, &pubkey, size) != NULL;
 }
 
+static bool ReadLaxDERLength(
+    const unsigned char* input,
+    size_t inputLen,
+    size_t& pos,
+    size_t& length)
+{
+    if (pos >= inputLen)
+        return false;
+
+    unsigned char lengthByte = input[pos++];
+
+    if ((lengthByte & 0x80) == 0) {
+        length = lengthByte;
+        return true;
+    }
+
+    size_t lengthBytes = lengthByte & 0x7f;
+    if (lengthBytes == 0 || pos + lengthBytes > inputLen)
+        return false;
+
+    while (lengthBytes > 0 && input[pos] == 0) {
+        ++pos;
+        --lengthBytes;
+    }
+
+    if (lengthBytes > sizeof(size_t))
+        return false;
+
+    length = 0;
+    for (size_t i = 0; i < lengthBytes; ++i)
+        length = (length << 8) | input[pos++];
+
+    return true;
+}
+
+static ECDSA_SIG* ParseLaxDERSignature(
+    const std::vector<unsigned char>& signature)
+{
+    if (signature.empty())
+        return NULL;
+
+    const unsigned char* input = &signature[0];
+    const size_t inputLen = signature.size();
+    size_t pos = 0;
+    size_t sequenceLen = 0;
+    size_t rLen = 0;
+    size_t sLen = 0;
+
+    if (pos >= inputLen || input[pos++] != 0x30)
+        return NULL;
+
+    if (!ReadLaxDERLength(input, inputLen, pos, sequenceLen))
+        return NULL;
+
+    if (pos >= inputLen || input[pos++] != 0x02)
+        return NULL;
+
+    if (!ReadLaxDERLength(input, inputLen, pos, rLen))
+        return NULL;
+
+    if (rLen > inputLen - pos)
+        return NULL;
+
+    size_t rPos = pos;
+    pos += rLen;
+
+    if (pos >= inputLen || input[pos++] != 0x02)
+        return NULL;
+
+    if (!ReadLaxDERLength(input, inputLen, pos, sLen))
+        return NULL;
+
+    if (sLen > inputLen - pos)
+        return NULL;
+
+    size_t sPos = pos;
+
+    while (rLen > 0 && input[rPos] == 0) {
+        ++rPos;
+        --rLen;
+    }
+
+    while (sLen > 0 && input[sPos] == 0) {
+        ++sPos;
+        --sLen;
+    }
+
+    if (rLen > 32 || sLen > 32)
+        return NULL;
+
+    BIGNUM* r = BN_bin2bn(input + rPos, rLen, NULL);
+    BIGNUM* s = BN_bin2bn(input + sPos, sLen, NULL);
+
+    if (r == NULL)
+        r = BN_new();
+    if (s == NULL)
+        s = BN_new();
+
+    if (r == NULL || s == NULL) {
+        BN_free(r);
+        BN_free(s);
+        return NULL;
+    }
+
+    if (rLen == 0)
+        BN_zero(r);
+    if (sLen == 0)
+        BN_zero(s);
+
+    ECDSA_SIG* parsed = ECDSA_SIG_new();
+    if (parsed == NULL || !SetECDSASigValues(parsed, r, s)) {
+        BN_free(r);
+        BN_free(s);
+        ECDSA_SIG_free(parsed);
+        return NULL;
+    }
+
+    return parsed;
+}
+
 bool CECKey::Verify(const uint256& hash, const std::vector<unsigned char>& vchSig)
 {
-    if (vchSig.empty())
+    ECDSA_SIG* normSig = ParseLaxDERSignature(vchSig);
+    if (normSig == NULL)
         return false;
 
-    // New versions of OpenSSL will reject non-canonical DER signatures. de/re-serialize first.
-    unsigned char* norm_der = NULL;
-    ECDSA_SIG* norm_sig = ECDSA_SIG_new();
-    const unsigned char* sigptr = &vchSig[0];
-    assert(norm_sig);
-    if (d2i_ECDSA_SIG(&norm_sig, &sigptr, vchSig.size()) == NULL) {
-        /* As of OpenSSL 1.0.0p d2i_ECDSA_SIG frees and nulls the pointer on
-         * error. But OpenSSL's own use of this function redundantly frees the
-         * result. As ECDSA_SIG_free(NULL) is a no-op, and in the absence of a
-         * clear contract for the function behaving the same way is more
-         * conservative.
-         */
-        ECDSA_SIG_free(norm_sig);
-        return false;
-    }
-    int derlen = i2d_ECDSA_SIG(norm_sig, &norm_der);
-    ECDSA_SIG_free(norm_sig);
-    if (derlen <= 0)
+    unsigned char* normDer = NULL;
+    int derLen = i2d_ECDSA_SIG(normSig, &normDer);
+    ECDSA_SIG_free(normSig);
+
+    if (derLen <= 0)
         return false;
 
-    // -1 = error, 0 = bad sig, 1 = good
-    bool ret = ECDSA_verify(0, (unsigned char*)&hash, sizeof(hash), norm_der, derlen, pkey) == 1;
-    OPENSSL_free(norm_der);
-    return ret;
+    bool result =
+        ECDSA_verify(
+            0,
+            (unsigned char*)&hash,
+            sizeof(hash),
+            normDer,
+            derLen,
+            pkey
+        ) == 1;
+
+    OPENSSL_free(normDer);
+    return result;
 }
 
 bool CECKey::Recover(const uint256& hash, const unsigned char* p64, int rec)

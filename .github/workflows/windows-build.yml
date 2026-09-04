@@ -4,11 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - release-4.2.6.9
-    paths:
-      - ".github/workflows/windows-build.yml"
-      - "src/rpcserver.cpp"
-      - "src/new808coin-cli.cpp"
+      - release-5.2.6.10
 
 jobs:
   build:
@@ -93,7 +89,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Windows-11-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Windows-11-x86_64"
 
           mkdir -p "$PACKAGE"
 
@@ -116,7 +112,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Windows-11-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Windows-11-x86_64"
           REPORT="$PACKAGE/windows-binaries.txt"
           : > "$REPORT"
 
@@ -140,7 +136,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Windows-11-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Windows-11-x86_64"
           ARCHIVE="$PACKAGE.zip"
 
           zip -r -9 "$ARCHIVE" "$PACKAGE"
@@ -153,7 +149,7 @@ jobs:
         with:
           name: new808coin-Windows-11-x86_64
           path: |
-            New808coin-4.2.6.9-Windows-11-x86_64.zip
-            New808coin-4.2.6.9-Windows-11-x86_64.zip.sha256
-            New808coin-4.2.6.9-Windows-11-x86_64/windows-binaries.txt
+            New808coin-5.2.6.10-Windows-11-x86_64.zip
+            New808coin-5.2.6.10-Windows-11-x86_64.zip.sha256
+            New808coin-5.2.6.10-Windows-11-x86_64/windows-binaries.txt
           if-no-files-found: error

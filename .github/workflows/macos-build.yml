@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - macos-universal
+      - release-5.2.6.10
 
 jobs:
   build:
@@ -87,8 +87,8 @@ jobs:
           echo "$QT_PREFIX/bin" >> "$GITHUB_PATH"
           echo "$PROTOBUF_PREFIX/bin" >> "$GITHUB_PATH"
 
-          echo "CPPFLAGS=-I$BREW_PREFIX/include -I$OPENSSL_PREFIX/include -I$BDB_PREFIX/include" >> "$GITHUB_ENV"
-          echo "LDFLAGS=-L$BREW_PREFIX/lib -L$OPENSSL_PREFIX/lib -L$BDB_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I$PROTOBUF_PREFIX/include -I$OPENSSL_PREFIX/include -I$BDB_PREFIX/include -I$BREW_PREFIX/include" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$PROTOBUF_PREFIX/lib -L$OPENSSL_PREFIX/lib -L$BDB_PREFIX/lib -L$BREW_PREFIX/lib" >> "$GITHUB_ENV"
           echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=$QT_PREFIX/lib/pkgconfig:$OPENSSL_PREFIX/lib/pkgconfig:$PROTOBUF_PREFIX/lib/pkgconfig:$BREW_PREFIX/lib/pkgconfig" >> "$GITHUB_ENV"
 
@@ -100,6 +100,7 @@ jobs:
           ./configure \
             --disable-tests \
             --with-gui=qt5 \
+            --with-qtdbus=no \
             --with-boost="$(brew --prefix boost)" \
             --with-boost-libdir="$(brew --prefix boost)/lib" \
             --with-miniupnpc
@@ -172,9 +173,9 @@ jobs:
           plutil -insert CFBundlePackageType \
             -string "APPL" "$PLIST"
           plutil -insert CFBundleVersion \
-            -string "4.2.6.9" "$PLIST"
+            -string "5.2.6.10" "$PLIST"
           plutil -insert CFBundleShortVersionString \
-            -string "4.2.6.9" "$PLIST"
+            -string "5.2.6.10" "$PLIST"
           plutil -insert LSMinimumSystemVersion \
             -string "15.0" "$PLIST"
           plutil -insert NSHighResolutionCapable \
@@ -491,7 +492,7 @@ jobs:
           set -euo pipefail
 
           PACKAGE="New808coin-macOS-universal"
-          ZIP="New808coin-4.2.6.9-macOS-universal-unsigned.zip"
+          ZIP="New808coin-5.2.6.10-macOS-universal-unsigned.zip"
 
           ditto -c -k \
             --sequesterRsrc \
@@ -507,7 +508,7 @@ jobs:
         with:
           name: new808coin-macOS-universal-unsigned
           path: |
-            New808coin-4.2.6.9-macOS-universal-unsigned.zip
-            New808coin-4.2.6.9-macOS-universal-unsigned.zip.sha256
+            New808coin-5.2.6.10-macOS-universal-unsigned.zip
+            New808coin-5.2.6.10-macOS-universal-unsigned.zip.sha256
             New808coin-macOS-universal/runtime-libraries.txt
           if-no-files-found: error

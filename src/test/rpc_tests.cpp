@@ -98,10 +98,10 @@ BOOST_AUTO_TEST_CASE(rpc_rawsign)
       "\"vout\":1,\"scriptPubKey\":\"a914f5404a39a4799d8710e15db4c4512c5e06f97fed87\","
       "\"redeemScript\":\"5121021431a18c7039660cd9e3612a2a47dc53b69cb38ea4ad743b7df8245fd0438f8e21029bbeff390ce736bd396af43b52a1c14ed52c086b1e5585c15931f68725772bac52ae\"}]";
     r = CallRPC(string("createrawtransaction ")+prevout+" "+
-      "{\"GPbEQ1hJxpJkWBDKMpc4y2KkugwuUaRUTY\":1}");
+      "{\"NRfHAeAdcXFtmgJcj7brEuQZMFp48Fk7tX\":1}");
     string notsigned = r.get_str();
-    string privkey1 = "\"YVobcS47fr6kceZy9LzLJR8WQ6YRpUwYKoJhrnEXepebMxaSpbnn\"";
-    string privkey2 = "\"YRyMjG8hbm8jHeDMAfrzSeHq5GgAj7kuHFvJtMudCUH3sCkq1WtA\"";
+    string privkey1 = "\"7wYvheEncL1vrkNTLmU69XRf5yC9F1vsJTu4yNip9PYSd1TUuUNd\"";
+    string privkey2 = "\"7sigpUKNYF3uXk1qN6LkHkaym9Kt9ekEFvWfzxPuh3Au8FjrAjJx\"";
     r = CallRPC(string("signrawtransaction ")+notsigned+" "+prevout+" "+"[]");
     BOOST_CHECK(find_value(r.get_obj(), "complete").get_bool() == false);
     r = CallRPC(string("signrawtransaction ")+notsigned+" "+prevout+" "+"["+privkey1+","+privkey2+"]");
@@ -186,6 +186,7 @@ BOOST_AUTO_TEST_CASE(rpc_boostasiotocnetaddr)
     BOOST_CHECK_EQUAL(BoostAsioToCNetAddr(boost::asio::ip::make_address("1.2.3.4")).ToString(), "1.2.3.4");
     BOOST_CHECK_EQUAL(BoostAsioToCNetAddr(boost::asio::ip::make_address("127.0.0.1")).ToString(), "127.0.0.1");
     // Check IPv6 addresses
+    BOOST_CHECK_EQUAL(BoostAsioToCNetAddr(boost::asio::ip::make_address("::")).ToString(), "::");
     BOOST_CHECK_EQUAL(BoostAsioToCNetAddr(boost::asio::ip::make_address("::1")).ToString(), "::1");
     BOOST_CHECK_EQUAL(BoostAsioToCNetAddr(boost::asio::ip::make_address("123:4567:89ab:cdef:123:4567:89ab:cdef")).ToString(),
                                          "123:4567:89ab:cdef:123:4567:89ab:cdef");
