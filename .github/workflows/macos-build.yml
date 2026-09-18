@@ -2,9 +2,6 @@ name: macOS Universal Build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - release-5.2.6.10
 
 jobs:
   build:
