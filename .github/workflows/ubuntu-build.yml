@@ -2,9 +2,6 @@ name: Ubuntu 24.04 Build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - release-4.2.6.9
 
 jobs:
   build:
@@ -135,7 +132,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Ubuntu-24.04-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Ubuntu-24.04-x86_64"
 
           mkdir -p "$PACKAGE/bin"
 
@@ -161,7 +158,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Ubuntu-24.04-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Ubuntu-24.04-x86_64"
           REPORT="$PACKAGE/runtime-libraries.txt"
           : > "$REPORT"
 
@@ -191,7 +188,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Ubuntu-24.04-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Ubuntu-24.04-x86_64"
 
           test_command() {
             binary="$1"
@@ -221,12 +218,12 @@ jobs:
           test_command \
             "$PACKAGE/bin/new808coind" \
             "--version" \
-            "4.2.6.9"
+            "5.2.6.10"
 
           test_command \
             "$PACKAGE/bin/new808coin-cli" \
             "--version" \
-            "4.2.6.9"
+            "5.2.6.10"
 
           test_command \
             "$PACKAGE/bin/new808coin-tx" \
@@ -237,14 +234,14 @@ jobs:
             test_command \
               "$PACKAGE/new808coin-qt" \
               "--version" \
-              "4.2.6.9"
+              "5.2.6.10"
 
       - name: Create archive and checksum
         shell: bash
         run: |
           set -euo pipefail
 
-          PACKAGE="New808coin-4.2.6.9-Ubuntu-24.04-x86_64"
+          PACKAGE="New808coin-5.2.6.10-Ubuntu-24.04-x86_64"
           ARCHIVE="$PACKAGE.tar.gz"
 
           tar -czf "$ARCHIVE" "$PACKAGE"
@@ -257,7 +254,7 @@ jobs:
         with:
           name: new808coin-Ubuntu-24.04-x86_64
           path: |
-            New808coin-4.2.6.9-Ubuntu-24.04-x86_64.tar.gz
-            New808coin-4.2.6.9-Ubuntu-24.04-x86_64.tar.gz.sha256
-            New808coin-4.2.6.9-Ubuntu-24.04-x86_64/runtime-libraries.txt
+            New808coin-5.2.6.10-Ubuntu-24.04-x86_64.tar.gz
+            New808coin-5.2.6.10-Ubuntu-24.04-x86_64.tar.gz.sha256
+            New808coin-5.2.6.10-Ubuntu-24.04-x86_64/runtime-libraries.txt
           if-no-files-found: error
