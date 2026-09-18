@@ -128,6 +128,13 @@ void CBudgetManager::CheckOrphanVotes()
 
 void CBudgetManager::SubmitFinalBudget()
 {
+    // Finalizing a budget creates and commits a collateral transaction. A
+    // walletless hot masternode cannot perform that controller-wallet task.
+    if (!pwalletMain) {
+        LogPrint("masternode", "CBudgetManager::SubmitFinalBudget - Wallet is disabled\n");
+        return;
+    }
+
     static int nSubmittedHeight = 0; // height at which final budget was submitted last time
     int nCurrentHeight;
 

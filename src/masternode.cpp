@@ -445,6 +445,12 @@ bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMast
         return false;
     }
 
+    if (!pwalletMain) {
+        strErrorRet = "Wallet is disabled; create the masternode broadcast on the controller wallet";
+        LogPrint("masternode", "CMasternodeBroadcast::Create -- %s\n", strErrorRet);
+        return false;
+    }
+
     if (!masternodeSigner.GetKeysFromSecret(strKeyMasternode, keyMasternodeNew, pubKeyMasternodeNew)) {
         strErrorRet = strprintf("Invalid masternode key %s", strKeyMasternode);
         LogPrint("masternode","CMasternodeBroadcast::Create -- %s\n", strErrorRet);
