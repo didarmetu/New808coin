@@ -1092,21 +1092,19 @@ UniValue CRPCTable::execute(const std::string &strMethod, const UniValue &params
                 result = pcmd->actor(params, false);
             } else {
                 while (true) {
-                    TRY_LOCK(cs_main, lockMain);
-                    if (!lockMain) {
-                        MilliSleep(50);
-                        continue;
-                    }
-                    while (true) {
-                        TRY_LOCK(pwalletMain->cs_wallet, lockWallet);
-                        if (!lockMain) {
-                            MilliSleep(50);
-                            continue;
+                    {
+                        TRY_LOCK(cs_main, lockMain);
+                        if (lockMain) {
+                            TRY_LOCK(pwalletMain->cs_wallet, lockWallet);
+                            if (lockWallet) {
+                                result = pcmd->actor(params, false);
+                                break;
+                            }
                         }
-                        result = pcmd->actor(params, false);
-                        break;
                     }
-                    break;
+
+                    // Both attempted locks are released before waiting.
+                    MilliSleep(50);
                 }
             }
 #else  // ENABLE_WALLET
