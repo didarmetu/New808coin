@@ -11,6 +11,16 @@
 #include "masternode.h"
 #include "net.h"
 #include "sync.h"
+
+/*
+ * TODO: Separate controller-wallet operations from walletless hot-masternode
+ * operations. This interface currently exposes wallet types such as COutput
+ * and therefore requires wallet.h. Together with the current Makefile source
+ * organization, this prevents configure-time --disable-wallet builds.
+ *
+ * Runtime -disablewallet=1 is a separate mode and is supported by the
+ * null-wallet guards in the masternode runtime paths.
+ */
 #include "wallet.h"
 
 #define ACTIVE_MASTERNODE_INITIAL 0 // initial state
